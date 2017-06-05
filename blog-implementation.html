@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
         <meta charset="utf-8" />
-        <title>Ben's Blog - Ben Hoff</title>
+        <title>Blog Implementation Stream of Conscious</title>
         <link rel="stylesheet" href="/theme/css/main.css" />
 
         <!--[if IE]>
@@ -14,13 +14,18 @@
         <header id="banner" class="body">
                 <h1><a href="/">Ben's Blog </a></h1>
                 <nav><ul>
-                    <li><a href="/category/blog.html">blog</a></li>
+                    <li class="active"><a href="/category/blog.html">blog</a></li>
                 </ul></nav>
         </header><!-- /#banner -->
+<section id="content" class="body">
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="/blog-implementation.html" rel="bookmark"
+           title="Permalink to Blog Implementation Stream of Conscious">Blog Implementation Stream of Conscious</a></h1>
+    </header>
 
-            <aside id="featured" class="body">
-                <article>
-                    <h1 class="entry-title"><a href="/blog-implementation.html">Blog Implementation Stream of Conscious</a></h1>
+    <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2017-06-04T21:27:00-05:00">
                 Published: Sun 04 June 2017
@@ -31,7 +36,7 @@
         </address>
 <p>In <a href="/category/blog.html">blog</a>.</p>
 <p>tags: <a href="/tag/blog.html">blog</a> <a href="/tag/implementation.html">implementation</a> </p>
-</footer><!-- /.post-info --><p>Allright, let's start implementing a blog.</p>
+</footer><!-- /.post-info -->      <p>Allright, let's start implementing a blog.</p>
 <p>First off, let's get the Github Pages up first.</p>
 <p>Going to <a class="reference external" href="https://pages.github.com/">https://pages.github.com/</a> gives the instructions.</p>
 <p>I need to create a repository named after my username and push the repo. Easy enough. Next I need to create an index.html file. Github recommends &quot;hello world&quot;. Sounds good to me.</p>
@@ -76,41 +81,11 @@
 <cite>git remote add publish git&#64;github.com:benhoff/benhoff.github.io</cite>
 <cite>git push -f publish gh-pages:master</cite></p>
 <p>I'll still have to manually push the gh-pages branch, but this is good enough for now.</p>
-                </article>
-            </aside><!-- /#featured -->
-                <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
 
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="/blog-tech-stack-thoughts.html" rel="bookmark"
-                           title="Permalink to Blog Initial Tech Stack Thoughts">Blog Initial Tech Stack Thoughts</a></h1>
-                </header>
+    </div><!-- /.entry-content -->
 
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2017-06-04T20:30:00-05:00">
-                Published: Sun 04 June 2017
-        </abbr>
-		<br />
-        <abbr class="modified" title="2017-06-04T20:35:00-05:00">
-                Updated: Sun 04 June 2017
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="/author/ben-hoff.html">Ben Hoff</a>
-        </address>
-<p>In <a href="/category/blog.html">blog</a>.</p>
-<p>tags: <a href="/tag/blog.html">blog</a> <a href="/tag/tech.html">tech</a> <a href="/tag/stack.html">stack</a> </p>
-</footer><!-- /.post-info -->                <p class="first last">Walking through the intial tech stack considerations for a new blog.</p>
-
-                <a class="readmore" href="/blog-tech-stack-thoughts.html">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-                </ol><!-- /#posts-list -->
-                </section><!-- /#content -->
+  </article>
+</section>
         <section id="extras" class="body">
                 <div class="blogroll">
                         <h2>links</h2>
