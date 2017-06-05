@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Ben's Blog</title><link href="http://benhoff.github.io/" rel="alternate"></link><link href="http://benhoff.github.io/feeds/all.atom.xml" rel="self"></link><id>http://benhoff.github.io/</id><updated>2017-06-04T20:35:00-05:00</updated><entry><title>Blog Initial Tech Stack Thoughts</title><link href="http://benhoff.github.io/blog-tech-stack-thoughts.html" rel="alternate"></link><published>2017-06-04T20:30:00-05:00</published><updated>2017-06-04T20:35:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.github.io,2017-06-04:/blog-tech-stack-thoughts.html</id><summary type="html">&lt;p class="first last"&gt;Walking through the intial tech stack considerations for a new blog.&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;Ok, let's start a blog.&lt;/p&gt;
+&lt;p&gt;First of all, we need a tech stack. My inital thoughts are to use a static site generator. None of the blog code needs to be dynamic, and I can import a javascript comment system (such as discus) later. Probably end up using google analytics as well.&lt;/p&gt;
+&lt;p&gt;I'll be using either markdown or restructured text so that I can track the blog configuration using git.&lt;/p&gt;
+&lt;p&gt;Perfect, so we've got a static site generator, mardown/restructured text, third party analytics and commenting... now on to hosting. Since I don't feel like taking on the hosting thing for now, and the domain name isn't important, let's just stick with github pages. I'm pretty sure it's free.&lt;/p&gt;
+&lt;p&gt;The only other things that I would like would be some responsive desing (I primarily read using my smart phone) and some way to embed a jupyter notebbook directly in the page.&lt;/p&gt;
+&lt;p&gt;I'll save the responsive design for another day (and a more complicated folder directory as well), but the desire for jupyter notebook means I'll probably be using some sort of python stack instead of the (likely more popular) Github incarnation of Jekyll.&lt;/p&gt;
+&lt;p&gt;A quick google search shows that Pelican is likely the largest/most supported python static site generator. Looks like it can work with either markdown or restructured text (I'll probably stick with restructured text since I've written some README's with it). Perfect. Another quick search shows there's a plugin that allows for Jupyter-Notebooks to be in embedded. We're cooking with fire now. So let's review our tech.&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Git (version control)&lt;/li&gt;
+&lt;li&gt;Resturctured Text (text markup)&lt;/li&gt;
+&lt;li&gt;Github Pages (website hosting/Domain)&lt;/li&gt;
+&lt;li&gt;Pelican (static site generator)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Tech to be implemented later (third party and potentially hard)&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Disqus (comments)&lt;/li&gt;
+&lt;li&gt;Google Analytics (analytics)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Aweomse, let's start implementing.&lt;/p&gt;
+</content><category term="blog"></category><category term="tech"></category><category term="stack"></category></entry></feed>
