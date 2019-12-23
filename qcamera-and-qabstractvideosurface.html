@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>Integrating QCamera and QAbstractVideoSurface Together</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/qcamera-and-qabstractvideosurface.html">
+    <meta name="twitter:title" content="Ben's Blog ~ Integrating QCamera and QAbstractVideoSurface Together">
+    <meta name="twitter:description" content="Working with a new client to integrate video and desktop together">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ Integrating QCamera and QAbstractVideoSurface Together"/>
+    <meta property="og:description" content="Working with a new client to integrate video and desktop together"/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li class="active"><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/qcamera-and-qabstractvideosurface.html" rel="bookmark"
+                                                  title="Permalink to Integrating QCamera and QAbstractVideoSurface Together">Integrating QCamera and QAbstractVideoSurface&nbsp;Together</a></h2>
+            <div class="entry-content blog-post">
+                <p>I had a client approach me about doing a webcam integration user interface, which was great! I&#8217;ve been looking (<span class="caps">ITCHING</span>) for a reason to play with Qt&#8217;s video stack&nbsp;again.</p>
+<p>Specifically the last time I left off with my explorations with Qt, I really wanted to integrate an Augmented Reality demo together with a webcamera. I wanted to integrate it with the Qt3D framework to show off the ability to integrate it all. I never could figure out how to do it (see <a href="https://stackoverflow.com/questions/50291828/how-to-display-an-image-in-qt3d">this Stackoverflow question</a>), but that doesn&#8217;t mean I had given up the&nbsp;problem.</p>
+<p>Being technology greedy, I was also interested in learning how Qt&#8217; QVideoFilter classes worked (see <a href="https://doc.qt.io/qt-5/qvideofilterrunnable.html">here</a>), to create a snapchat&nbsp;clone.</p>
+<p>So you know, Augmented Reality, Snapchat, webcam-driven <span class="caps">QML</span> application. Just a casual Tuesday for me&nbsp;really.</p>
+<p>However I ran into issues getting to the data (and getting Qt3D to display an image as noted&nbsp;above).</p>
+<p>So when the client approached me to do an Qt and OpenCV integration, I knew I would finally have my chance to conquer Qt&#8217;s QCamera&nbsp;class.</p>
+<p>Which is exactly what I&nbsp;did.</p>
+<p>So the QCamera class has a <code>setViewfinder</code> method, where you can set an interface that can work with the raw data. In levels of concereteness to abstraction, the available classes are <code>QVideoWidget</code>, <code>QCameraViefinder</code> and <code>QAbstractVideoSurface</code>. QVideoWidget is a fully featured widget, whereas <code>QAbstractVideoSurface</code> is the abstract version ready to be subclassed and&nbsp;implemented.</p>
+<p>When you dig through the source code for the more concrete classes, you get exposed to a lot of raw OpenGL. Having done some OpenGL programming before, I kind of know OpenGL, but I&#8217;m no expert. Additionally, it&#8217;s not anything I wanted to introduce into the class I was teaching at the time. So I kind of punted on the whole&nbsp;thing.</p>
+<p>Creating a video course takes a lot of time, and I had to abandon any ideas that were too complex for my time frame. I couldn&#8217;t figure out if the OpenGL implementation made the program significantly more robust, because I couldn&#8217;t figure out if <span class="caps">NOT</span> implementing the program as OpenGL, would force me to download the data out of video memory and push it back up into video memory (a significant battery drainer for a mobile application). I don&#8217;t think that is the case, but I didn&#8217;t have time to explore. Luckily for this particular client, everything was on Desktop, so I didn&#8217;t need to worry about the specific battery&nbsp;constraints.</p>
+<p>In order to implement QAbstractVideoSurface, you have to override/implement two methods: <code>supportedPixelFormats</code> and <code>present</code>. In the <code>supportedPixelFormats</code> method, you describe to the rest of the framework which types of QVideoFrame data formats that your implementation can support. My understanding is, if the data comes in a format that you don&#8217;t explicitly authorize, then the Qt framework uses the underlying system to convert the data into the format that you&nbsp;want.</p>
+<p>Again, running on desktop and for a <span class="caps">MVP</span>, this wasn&#8217;t a big concern for&nbsp;me.</p>
+<p>Instead, I wanted the system to handle as much of the conversion as possible, so I only exposed a single video format, <span class="caps">RGB32</span>.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">VideoSurface</span><span class="p">(</span><span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QAbstractVideoSurface</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">supportedPixelFormats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle_type</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">handle_type</span> <span class="o">==</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QAbstractVideoBuffer</span><span class="o">.</span><span class="n">NoHandle</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_RGB32</span><span class="p">,]</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+
+
+<p>This leaves only the <code>present</code> method. Present is where you actually handle the video data. I wanted to convert the video data into a format that I can use for the rest of my&nbsp;program.</p>
+<p>I still find the image data types in Qt to be slightly confusing (I always have to look them up). Broadly though, I use primarily either QImage or QPixmap. I know QPixmap is to be used for display images, and I still wanted to manipulate my image, so I settled on QImage. So I had to convert my QVideoFrame to a QImage. Easy&nbsp;enough.</p>
+<div class="highlight"><pre><span></span><span class="c1"># class VideoSurface(QtMultimedia.QAbstractVideoSurface):</span>
+    <span class="k">def</span> <span class="nf">present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="p">):</span>
+        <span class="n">copy</span> <span class="o">=</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="n">copy</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QAbstractVideoBuffer</span><span class="o">.</span><span class="n">ReadOnly</span><span class="p">)</span>
+
+        <span class="n">image_format</span> <span class="o">=</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">imageFormatFromPixelFormat</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">pixelFormat</span><span class="p">())</span>
+
+        <span class="n">my_image</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">bits</span><span class="p">(),</span> <span class="n">copy</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">copy</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="n">copy</span><span class="o">.</span><span class="n">bytesPerLine</span><span class="p">(),</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format</span><span class="p">(</span><span class="n">image_format</span><span class="p">))</span>
+
+        <span class="n">copy</span><span class="o">.</span><span class="n">unmap</span><span class="p">()</span>
+        <span class="c1"># Do something with your new `QImage` here!</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</pre></div>
+
+
+<p>Now I finally had what I wanted all that time ago! A simple example of low level access out of a QCamera. The only thing to do is wire it up to a&nbsp;QCamera</p>
+<div class="highlight"><pre><span></span><span class="n">camera</span> <span class="o">=</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QCamera</span><span class="p">()</span>
+<span class="n">video_surface</span> <span class="o">=</span> <span class="n">VideoSurface</span><span class="p">()</span>
+<span class="n">camera</span><span class="o">.</span><span class="n">unload</span><span class="p">()</span>
+<span class="n">camera</span><span class="o">.</span><span class="n">setViewfinder</span><span class="p">(</span><span class="n">video_surface</span><span class="p">)</span>
+<span class="n">camera</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/pyqt.html" rel="bookmark"
+                                               title="Permalink to PyQt">[ PyQt ]</a></span>
+                <span class="post_date">Tue 10 December 2019</span>
+                <div><span>Tags : </span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/qcamera-and-qabstractvideosurface.html&text=Integrating QCamera and QAbstractVideoSurface Together&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/qcamera-and-qabstractvideosurface.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/qcamera-and-qabstractvideosurface.html&t=Integrating QCamera and QAbstractVideoSurface Together"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/qcamera-and-qabstractvideosurface.html&title=Integrating QCamera and QAbstractVideoSurface Together"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=Integrating QCamera and QAbstractVideoSurface Together&amp;body=Viens découvrir un article à propos de [Integrating QCamera and QAbstractVideoSurface Together] sur le site de Ben Hoff. https://benhoff.net/qcamera-and-qabstractvideosurface.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/qcamera-and-qabstractvideosurface.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>

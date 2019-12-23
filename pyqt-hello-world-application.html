@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>PyQt Hello World Application</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/pyqt-hello-world-application.html">
+    <meta name="twitter:title" content="Ben's Blog ~ PyQt Hello World Application">
+    <meta name="twitter:description" content="Creating the hello world app of desktop applications.">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ PyQt Hello World Application"/>
+    <meta property="og:description" content="Creating the hello world app of desktop applications."/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li class="active"><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/pyqt-hello-world-application.html" rel="bookmark"
+                                                  title="Permalink to PyQt Hello World Application">PyQt Hello World&nbsp;Application</a></h2>
+            <div class="entry-content blog-post">
+                <div class="section" id="getting-started">
+<h2>Getting&nbsp;Started</h2>
+<p>This is the first step in the <a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst">PyQt Tutorial series</a>!&nbsp;Welcome!</p>
+<p>We&#8217;re going to start with a hello world application, as sometimes getting everything installed and working correctly can be an emotionally terrifying experience. Just ask me. I&#8217;ve done software&nbsp;before.</p>
+<p>So starting from&nbsp;nothing.</p>
+</div>
+<div class="section" id="install-python">
+<h2>Install&nbsp;Python</h2>
+<p><a class="reference external" href="http://python-guide-pt-br.readthedocs.io/en/latest/starting/installation/">Follow these installation instructions</a>, based on your <span class="caps">OS</span>.</p>
+<p>If you&#8217;re running a linux distribution, you can likely use your native package&nbsp;manager.</p>
+<p>Make sure if you&#8217;re running Windows that you add Python to your path library. It should be a pop-up option during the install. If you mess up, <cite>turn to Google</cite>.</p>
+<p>Make sure you install Python 3. This tutorial will not be for <a class="reference external" href="https://pythonclock.org/">Python 2</a> as Python 2 is reaching it&#8217;s end of life for official&nbsp;support.</p>
+</div>
+<div class="section" id="create-a-working-directory">
+<h2>Create A Working&nbsp;Directory</h2>
+<p>Create a directory you want to work out&nbsp;of.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> mkdir pyqt
+<span class="gp">$</span> <span class="nb">cd</span> pyqt
+</pre></div>
+</div>
+<div class="section" id="create-virtual-environment">
+<h2>Create Virtual&nbsp;Environment</h2>
+<p>We&#8217;re going to create and activate a virtual environment, so that your global site-packages stay clean. Hard to keep track of which project, installed which dependencies,&nbsp;otherwise.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> python -m venv &lt;DIR&gt;
+<span class="gp">$</span> <span class="nb">source</span> &lt;DIR&gt;/bin/activate
+</pre></div>
+</div>
+<div class="section" id="install-pyqt5">
+<h2>Install&nbsp;PyQt5</h2>
+<p>Right, now that our virtual environment is activated, let&#8217;s install&nbsp;PyQt.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> pip install PyQt5
+</pre></div>
+</div>
+<div class="section" id="build-the-framework">
+<h2>Build the&nbsp;Framework</h2>
+<p>Now, fire up your favorite text editor, it&#8217;s time to start programming. Create a file named <cite>__main__.py</cite> and add the following to&nbsp;it.</p>
+<div class="highlight"><pre><span></span><span class="c1"># file name: __main__.py</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="section" id="write-pyqt-specific-code">
+<h2>Write PyQt Specific&nbsp;Code</h2>
+<p>Now, in our main function, we&#8217;re going to create an instances of <a class="reference external" href="http://doc.qt.io/qt-5/qapplication.html">QApplication</a> and <a class="reference external" href="http://doc.qt.io/qt-5/qmainwindow.html">QMainWindow</a>. I&#8217;d recommend reading the <a class="reference external" href="http://doc.qt.io/qt-5/qapplication.html#details">documentation</a> on <tt class="docutils literal">QApplication</tt>, especially the section with the <em>main areas of responsibility</em>.</p>
+<p>If you don&#8217;t get there, the <span class="caps">TLDR</span> on <tt class="docutils literal">QApplication</tt> responsibilities:</p>
+<ul class="simple">
+<li>event&nbsp;handling</li>
+<li>main&nbsp;settings</li>
+</ul>
+<p><tt class="docutils literal">QMainWindow</tt> is a magical class. It gives a lot of normal desktop interface aspects that you&#8217;ve come to expect, such as a menu bar, tool bars, and status bars&#8230; <em>for free</em>. Again, the <a class="reference external" href="http://doc.qt.io/qt-5/qmainwindow.html#details">documentation is awesome</a>, but check out the below figure to get a hint for the types of functionality that are integrated into the <tt class="docutils literal">QMainWindow</tt> class.</p>
+<div class="figure align-center">
+<img alt="" src="http://doc.qt.io/qt-5/images/mainwindowlayout.png" />
+<p class="caption">Notice that the Menu Bar and Status Bar are tied to QMainWindow. We&#8217;ll come back to&nbsp;that.</p>
+</div>
+<p>So now that we now a little bit about what we&#8217;re doing, let&#8217;s write the rest of the code. The entire source script is available <a class="reference external" href="https://github.com/benhoff/blog/blob/master/scripts/pyqt-hello-world.py">at this link</a> as&nbsp;well.</p>
+<div class="highlight"><pre><span></span><span class="c1"># file name: __main__.py</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># We need to make the QApplication before our QMainWindow</span>
+    <span class="c1"># We also need to pass in our system argument values (sys.argv)</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">main_window</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    <span class="c1"># QMainWindow requires a central widget, so we&#39;ll just pass in a</span>
+    <span class="c1"># blank widget for now</span>
+    <span class="n">blank_widget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+    <span class="n">main_window</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">blank_widget</span><span class="p">)</span>
+    <span class="c1"># Show our main window</span>
+    <span class="n">main_window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="c1"># Start the event loop processing</span>
+    <span class="n">app</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span>
+</pre></div>
+<!-- TODO Get photo evidence -->
+<p>That&#8217;s it! You should see a small window open up. We&#8217;ve got the &#8220;Hello World&#8221; version for <span class="caps">GUI</span>&nbsp;programming.</p>
+<p>The next step is to talk about <a class="reference external" href="https://benhoff.net/qt-interface-design.rst">choices for our central widget design</a>, but if you&#8217;re an advanced PyQt programmer already, you can checkout <a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst">this high level overview</a> of the tutorial series to jump around to the topic you&nbsp;need.</p>
+</div>
+
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/pyqt.html" rel="bookmark"
+                                               title="Permalink to PyQt">[ PyQt ]</a></span>
+                <span class="post_date">Fri 16 June 2017</span>
+                <div><span>Tags : </span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/pyqt-hello-world-application.html&text=PyQt Hello World Application&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/pyqt-hello-world-application.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/pyqt-hello-world-application.html&t=PyQt Hello World Application"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/pyqt-hello-world-application.html&title=PyQt Hello World Application"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=PyQt Hello World Application&amp;body=Viens découvrir un article à propos de [PyQt Hello World Application] sur le site de Ben Hoff. https://benhoff.net/pyqt-hello-world-application.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/pyqt-hello-world-application.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>Blog Implementation Stream of Conscious</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/blog-implementation.html">
+    <meta name="twitter:title" content="Ben's Blog ~ Blog Implementation Stream of Conscious">
+    <meta name="twitter:description" content="Starting implementation of the blog as a work in progress.">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ Blog Implementation Stream of Conscious"/>
+    <meta property="og:description" content="Starting implementation of the blog as a work in progress."/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li class="active"><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/blog-implementation.html" rel="bookmark"
+                                                  title="Permalink to Blog Implementation Stream of Conscious">Blog Implementation Stream of&nbsp;Conscious</a></h2>
+            <div class="entry-content blog-post">
+                <p>All right, let&#8217;s start implementing a&nbsp;blog.</p>
+<p>First off, let&#8217;s get the Github Pages up&nbsp;first.</p>
+<p>Going to <a class="reference external" href="https://pages.github.com/">Github Pages site</a> gives the&nbsp;instructions.</p>
+<p>I need to create a repository named after my username and push the repo. Easy enough. Next I need to create an index.html file. Github recommends &#8220;hello world&#8221;. Sounds good to&nbsp;me.</p>
+<p>Using git to add and push my local repo up to the newly created repository. Visiting benhoff.github.io now shows our the new web page, hello world!&nbsp;Neat!</p>
+<p>Cool, now that I&#8217;ve got my page up, on to the static website generation. I&#8217;ll start by installing pelican in a virtual&nbsp;environment.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> mkdir swdev/blog
+
+<span class="gp">$</span> <span class="nb">cd</span> swdev/blog
+
+<span class="gp">$</span> python -m venv venv
+
+<span class="gp">$</span> <span class="nb">source</span>  venv bin activate
+
+<span class="gp">(venv) $</span> pip install pelican
+</pre></div>
+<p>Pelican has a quick start. Hold my breath here&nbsp;;)</p>
+<div class="highlight"><pre><span></span><span class="gp">(venv) $</span> pelican-quickstart
+</pre></div>
+<p>Oh man, I need a blog title? Hoff&#8217;s heroes? Let&#8217;s just stick with Ben&#8217;s Blog for now. The only other question I&#8217;m stumped on is the generation of a Fabfile/Makefile. Let&#8217;s say yes for now, and we can always delete it&nbsp;later.</p>
+<p>Looks like pelican is familiar with using Github pages.&nbsp;Nice.</p>
+<p>Awesome, the quickstart dumped a bunch of new files and folders into the directory. I&#8217;ve already written an initial thoughts post about this blog. Let&#8217;s dump that in the content&nbsp;directory.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> mv initial_blog_thoughts.txt content/initial_blog_thoughts.rst
+</pre></div>
+<p>I&#8217;m following the content tutorial <a class="reference external" href="http://docs.getpelican.com/en/stable/content.html">here</a>.</p>
+<p>There&#8217;s a bunch of metadata that pelcian says I&#8217;m missing, including the date, tags, category, slug, authors, and summary. Let&#8217;s go ahead and add all of&nbsp;those.</p>
+<p>I&#8217;ll need to go through and add in some of the resturctured text for the post, but I&#8217;ll do it&nbsp;later.</p>
+<p>Right now, I want to add in some <tt class="docutils literal">pages</tt>. According to Pelican, Pages are for _About_ and _Contact_ pages. That sounds&nbsp;good.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> mkdir pages
+</pre></div>
+<p>Uh, I thought I could create an <tt class="docutils literal">index.html</tt>? Doesn&#8217;t look like I can, I&#8217;ll just follow the next step in the tutorial and see where I end&nbsp;up.</p>
+<div class="highlight"><pre><span></span><span class="gp">(venv) $</span> pelican /path/to/my/content
+</pre></div>
+<p>Looks like the content needs to be the file directory and not the actual&nbsp;content.</p>
+<p>Nice, the output directory has an index file in it already. Let&#8217;s check it out using my&nbsp;browser.</p>
+<p>Ok, I&#8217;m not in love with the theme, but I can work with everything&nbsp;else.</p>
+<p>Let&#8217;s push this up and do it&nbsp;live.</p>
+<p>Ok, not as easy as I would like. We&#8217;re adventuring now. Pelican <a class="reference external" href="http://docs.getpelican.com/en/stable/tips.html">recommends</a> the use of <cite>ghp-import</cite>. I hate this kind of adventuring, since I&#8217;m pretty sure it&#8217;s not going to work. Sigh. Here we&nbsp;go.</p>
+<div class="highlight"><pre><span></span><span class="gp">(venv) $</span> pip install ghp-import
+
+<span class="gp">(venv) $</span> ghp-import output
+
+<span class="gp">(venv) $</span> git push git@github.com:benhoff/benhoff.github.io.git gh-pages:master
+</pre></div>
+<p>Yea, that didn&#8217;t work. Looks like since I&#8217;ve already pushed I&#8217;m going to have issues. Color me surprised. I swear, this is my surprised&nbsp;face.</p>
+<p>I&#8217;ve now got a <tt class="docutils literal"><span class="pre">gh-pages</span></tt> branch. That might be worth looking into. After some digging looks like I need to push the gh-pages&nbsp;branch.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> git push origin gh-pages
+</pre></div>
+<p>That didn&#8217;t appear to work. Maybe deleting my old &#8220;hello world&#8221; index file will&nbsp;help.</p>
+<p>Nope. Now we&#8217;re just 404ing. Looks like for a user page, content must be in the master. Well screw that. Let&#8217;s create a new repo for the blog code and then I&#8217;ll just push the github.io pages&nbsp;separate.</p>
+<p><em>New repo named&nbsp;`blog`</em></p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> git remote set-url git@github.com:benhoff/blog.git
+
+<span class="gp">$</span> git remote add publish git@github.com:benhoff/benhoff.github.io
+
+<span class="gp">$</span> git push -f publish gh-pages:master
+</pre></div>
+<p>I&#8217;ll still have to manually push the gh-pages branch, but this is good enough for&nbsp;now.</p>
+
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/blog.html" rel="bookmark"
+                                               title="Permalink to Blog">[ Blog ]</a></span>
+                <span class="post_date">Sun 04 June 2017</span>
+                <div><span>Tags : </span>
+                            <span><a href="https://benhoff.net/tag/blog.html">#blog, </a></span>
+                            <span><a href="https://benhoff.net/tag/implementation.html">#implementation, </a></span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/blog-implementation.html&text=Blog Implementation Stream of Conscious&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/blog-implementation.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/blog-implementation.html&t=Blog Implementation Stream of Conscious"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/blog-implementation.html&title=Blog Implementation Stream of Conscious"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=Blog Implementation Stream of Conscious&amp;body=Viens découvrir un article à propos de [Blog Implementation Stream of Conscious] sur le site de Ben Hoff. https://benhoff.net/blog-implementation.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/blog-implementation.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>

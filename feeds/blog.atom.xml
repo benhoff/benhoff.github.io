@@ -1,22 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Ben's Blog - blog</title><link href="http://benhoff.github.io/" rel="alternate"></link><link href="http://benhoff.github.io/feeds/blog.atom.xml" rel="self"></link><id>http://benhoff.github.io/</id><updated>2017-06-04T20:35:00-05:00</updated><entry><title>Blog Initial Tech Stack Thoughts</title><link href="http://benhoff.github.io/blog-tech-stack-thoughts.html" rel="alternate"></link><published>2017-06-04T20:30:00-05:00</published><updated>2017-06-04T20:35:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.github.io,2017-06-04:/blog-tech-stack-thoughts.html</id><summary type="html">&lt;p class="first last"&gt;Walking through the intial tech stack considerations for a new blog.&lt;/p&gt;
-</summary><content type="html">&lt;p&gt;Ok, let's start a blog.&lt;/p&gt;
-&lt;p&gt;First of all, we need a tech stack. My inital thoughts are to use a static site generator. None of the blog code needs to be dynamic, and I can import a javascript comment system (such as discus) later. Probably end up using google analytics as well.&lt;/p&gt;
-&lt;p&gt;I'll be using either markdown or restructured text so that I can track the blog configuration using git.&lt;/p&gt;
-&lt;p&gt;Perfect, so we've got a static site generator, mardown/restructured text, third party analytics and commenting... now on to hosting. Since I don't feel like taking on the hosting thing for now, and the domain name isn't important, let's just stick with github pages. I'm pretty sure it's free.&lt;/p&gt;
-&lt;p&gt;The only other things that I would like would be some responsive desing (I primarily read using my smart phone) and some way to embed a jupyter notebbook directly in the page.&lt;/p&gt;
-&lt;p&gt;I'll save the responsive design for another day (and a more complicated folder directory as well), but the desire for jupyter notebook means I'll probably be using some sort of python stack instead of the (likely more popular) Github incarnation of Jekyll.&lt;/p&gt;
-&lt;p&gt;A quick google search shows that Pelican is likely the largest/most supported python static site generator. Looks like it can work with either markdown or restructured text (I'll probably stick with restructured text since I've written some README's with it). Perfect. Another quick search shows there's a plugin that allows for Jupyter-Notebooks to be in embedded. We're cooking with fire now. So let's review our tech.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Ben's Blog - Blog</title><link href="https://benhoff.net/" rel="alternate"></link><link href="https://benhoff.net/feeds/blog.atom.xml" rel="self"></link><id>https://benhoff.net/</id><updated>2017-06-12T16:01:00-05:00</updated><entry><title>Mailing List Woes</title><link href="https://benhoff.net/mailing-list-woes.html" rel="alternate"></link><published>2017-06-12T16:01:00-05:00</published><updated>2017-06-12T16:01:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-06-12:/mailing-list-woes.html</id><summary type="html">&lt;p class="first last"&gt;Figuring out how to add a mailing&amp;nbsp;list.&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;All right, let&amp;#8217;s add a mailing&amp;nbsp;list.&lt;/p&gt;
+&lt;p&gt;So I know I&amp;#8217;ve got &lt;a class="reference external" href="https://www.mailgun.com"&gt;Mailgun&lt;/a&gt; use for &lt;a class="reference external" href="http://benhoff.net/adding-discourse-comments.html"&gt;Discourse&lt;/a&gt; (used for forum comments). Looking into the Mailgun documentation, I can see that there&amp;#8217;s an actual &lt;a class="reference external" href="https://documentation.mailgun.com/en/latest/api-mailinglists.html"&gt;&lt;span class="caps"&gt;API&lt;/span&gt;&lt;/a&gt; for a mailing list. However the documentation shows Mailgun&amp;#8217;s implementation is more of a backend deal. Which would be fine if I had a dynamic application, but since I&amp;#8217;m dealing with static pages, this is a major&amp;nbsp;hangup.&lt;/p&gt;
+&lt;p&gt;So my next option is to search for a look for either an already existing solution or host my&amp;nbsp;own.&lt;/p&gt;
+&lt;p&gt;This is a mailing list. I could build one with sqlite and python in like 5 minutes. And it would be&amp;nbsp;awful.&lt;/p&gt;
+&lt;p&gt;Let&amp;#8217;s start by looking to see what I can host&amp;nbsp;myself.&lt;/p&gt;
+&lt;p&gt;After some google searching, it looks like the only open source version is &lt;a class="reference external" href="https://www.gnu.org/software/mailman/"&gt;Mailman&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;ve got a confession to make. I&amp;#8217;ve tried to get Mailman up and running before. It didn&amp;#8217;t go very well. Mailman is a mailing list manager. It provides a way to see past emails, navigate replies, and search. Mailman does not provide a way to actually send emails. You have to hook either Postfix or something else up to actually get it up and&amp;nbsp;running.&lt;/p&gt;
+&lt;p&gt;Also the other thing is, I&amp;#8217;ve already got a full up forum with Discord. And right now, that forum is consuming 1 of 1 gigabytes of data that the Digital Ocean instance provides me. And I don&amp;#8217;t want to upsize the&amp;nbsp;instance.&lt;/p&gt;
+&lt;p&gt;So now I&amp;#8217;m back to using a hosted service. A couple of blogs recommended using &lt;a class="reference external" href="https://www.aweber.com/"&gt;Aweber&lt;/a&gt;, who I&amp;#8217;ve never heard of, but I&amp;#8217;m going to stick with &lt;a class="reference external" href="https://mailchimp.com/"&gt;Mailchimp&lt;/a&gt;, mostly because I&amp;#8217;ve heard of them&amp;nbsp;actually.&lt;/p&gt;
+&lt;p&gt;So signed up, started building a mailing list, got the html code to put into the site&amp;#8217;s template. Which is perfect. I&amp;#8217;ll eventually work towards sending out weekly &amp;#8220;round-up&amp;#8221; emails. Just a simple email that lays out all the articles so you don&amp;#8217;t have to visit the site to see what I&amp;#8217;m writing&amp;nbsp;about.&lt;/p&gt;
+&lt;p&gt;But there&amp;#8217;s some pieces I need to figure out. Since I&amp;#8217;ve got my own domain and a transactional mailing agent with Mailgun, I should be able to actually receive emails at the domain. As in: &lt;a class="reference external" href="mailto:ben&amp;#64;benhoff.net"&gt;ben&amp;#64;benhoff.net&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;I set up a few referral rules at Mailgun, but it&amp;#8217;s a little dicey currently. I&amp;#8217;ve gotten a few emails, but not all of them. I&amp;#8217;m not sure what&amp;#8217;s wrong, but I think it has something to do with the &lt;span class="caps"&gt;DNS&lt;/span&gt;&amp;nbsp;records.&lt;/p&gt;
+&lt;p&gt;If you have ever experienced or might now what&amp;#8217;s going on, feel free to comment below and point me in some resources. Otherwise, I&amp;#8217;ll dive into it later and post another article detailing the&amp;nbsp;fix.&lt;/p&gt;
+</content><category term="Blog"></category></entry><entry><title>Blog Tech Stack</title><link href="https://benhoff.net/blog-tech-stack.html" rel="alternate"></link><published>2017-06-12T08:34:00-05:00</published><updated>2017-06-12T08:34:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-06-12:/blog-tech-stack.html</id><summary type="html">&lt;p class="first last"&gt;Reviewing the tech stack and hosting services I&amp;#8217;m using for the&amp;nbsp;blog.&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;As I&amp;#8217;m looking to start up a mailing service I thought it be interesting to talk about the services I&amp;#8217;m using for hosting this blog. I&amp;#8217;ll do it in chronological order. Kind&amp;nbsp;of.&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="35%" /&gt;
+&lt;col width="65%" /&gt;
+&lt;/colgroup&gt;
+&lt;thead valign="bottom"&gt;
+&lt;tr&gt;&lt;th class="head"&gt;Service Type&lt;/th&gt;
+&lt;th class="head"&gt;Software/Provider&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;Static Site Generator&lt;/td&gt;
+&lt;td&gt;&lt;a class="reference external" href="https://blog.getpelican.com/"&gt;Pelcian&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Static Site Host&lt;/td&gt;
+&lt;td&gt;&lt;a class="reference external" href="https://pages.github.com/"&gt;Github Pages&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Comments/Forum&lt;/td&gt;
+&lt;td&gt;&lt;a class="reference external" href="https://www.discourse.org/"&gt;Discourse&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Dynamic Content Host &lt;a class="footnote-reference" href="#id3" id="id1"&gt;[1]&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a class="reference external" href="https://m.do.co/c/2fdf30b46683"&gt;Digital Ocean&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Domain Registration/&lt;span class="caps"&gt;DNS&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a class="reference external" href="https://domains.google/#/"&gt;Google Domains&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Transactional Email &lt;a class="footnote-reference" href="#id4" id="id2"&gt;[2]&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a class="reference external" href="https://www.mailgun.com/"&gt;Mailgun&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Mailing List&lt;/td&gt;
+&lt;td&gt;&lt;a class="reference external" href="https://mailchimp.com/"&gt;Mailchimp&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="id3" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Used for hosting the discourse instance&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="id4" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id2"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Transactional email is, according to &lt;a class="reference external" href="https://blog.mailchimp.com/what-is-transactional-email/"&gt;Mailchimp&amp;#8217;s Docs&lt;/a&gt;, an email sent to an individual based on some action. Discourse uses it for signups, which is why I needed it.&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+</content><category term="Blog"></category></entry><entry><title>Adding Discourse Comments</title><link href="https://benhoff.net/adding-discourse-comments.html" rel="alternate"></link><published>2017-06-10T14:25:00-05:00</published><updated>2017-06-10T14:25:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-06-10:/adding-discourse-comments.html</id><summary type="html">&lt;p class="first last"&gt;Working through adding Discourse Comments to the&amp;nbsp;blog.&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;Alright, here we go. Let&amp;#8217;s add comments to my static site. I waited until the weekend because I knew it was going to be a&amp;nbsp;pain.&lt;/p&gt;
+&lt;p&gt;So following the directions, I created a digital ocean droplet, and copied the github repo&amp;nbsp;over.&lt;/p&gt;
+&lt;p&gt;This was relatively easy for me. Had some issue with path wrangling, but got it figured out eventually. Github wants to ask for your github username weirdly when doing a git clone if you do it incorrectly. Eventually I just changed into the directory I wanted the repo and did the clone from there. Feel like I shouldn&amp;#8217;t have to do that, but&amp;nbsp;whatever.&lt;/p&gt;
+&lt;p&gt;Ok, so now I need email.&amp;nbsp;Damn.&lt;/p&gt;
+&lt;p&gt;Well let&amp;#8217;s stick with mailgun, since that sounds&amp;nbsp;familiar.&lt;/p&gt;
+&lt;p&gt;So I signed up for mailgun, but now I need a domain and a &lt;span class="caps"&gt;DNS&lt;/span&gt;&amp;nbsp;provider.&lt;/p&gt;
+&lt;p&gt;So I signed up for a domain on Google. &lt;cite&gt;benhoff.net&lt;/cite&gt;. Old school.&amp;nbsp;Perfect.&lt;/p&gt;
+&lt;p&gt;Just remembered that a domain and a &lt;span class="caps"&gt;DNS&lt;/span&gt; provider are different. Wonder if google will act as a &lt;span class="caps"&gt;DNS&lt;/span&gt; provider. I&amp;#8217;m swimming in unknown territory&amp;nbsp;now.&lt;/p&gt;
+&lt;p&gt;Ok, I need to add &lt;span class="caps"&gt;DNS&lt;/span&gt; records for sending according to&amp;nbsp;mailgun.&lt;/p&gt;
+&lt;p&gt;Uhh, I don&amp;#8217;t know what I&amp;#8217;m doing. Luckily there&amp;#8217;s this blogpost. &lt;a class="reference external" href="http://www.curtismlarson.com/blog/2015/04/12/github-pages-google-domains/"&gt;http://www.curtismlarson.com/blog/2015/04/12/github-pages-google-domains/&lt;/a&gt;
+What an annoying pop up&amp;nbsp;page.&lt;/p&gt;
+&lt;p&gt;Ok, I followed the directions to add the custom resource records from my google name to my google domain. According to the blog, it should take about a day to&amp;nbsp;resolve.&lt;/p&gt;
+&lt;p&gt;I don&amp;#8217;t think this solves my mailgun issue&amp;nbsp;though.&lt;/p&gt;
+&lt;p&gt;A little google fu: &lt;a class="reference external" href="https://stackoverflow.com/questions/37864807/setting-up-google-domains-dns-to-work-with-mailgun-mx-records"&gt;https://stackoverflow.com/questions/37864807/setting-up-google-domains-dns-to-work-with-mailgun-mx-records&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Looks like I need to add a subdomain as a &lt;span class="caps"&gt;MX&lt;/span&gt;&amp;nbsp;record.&lt;/p&gt;
+&lt;p&gt;So under Custom Resource records, I&amp;#8217;m going to add the name &lt;cite&gt;mg&lt;/cite&gt;, with the type &lt;cite&gt;&lt;span class="caps"&gt;MX&lt;/span&gt;&lt;/cite&gt; and add the &lt;cite&gt;mxa.mailgun.org&lt;/cite&gt; and &lt;cite&gt;mxb.mailgun.org&lt;/cite&gt;. Looks like google automagically adds a 10 and a period to the end of&amp;nbsp;that.&lt;/p&gt;
+&lt;p&gt;Cool, so now that I&amp;#8217;ve done that, I&amp;#8217;ve added the domain &lt;cite&gt;mg.benhoff.net&lt;/cite&gt; to the mailgun&amp;nbsp;side.&lt;/p&gt;
+&lt;p&gt;Now I need to add everything&amp;nbsp;else.&lt;/p&gt;
+&lt;p&gt;From this site: &lt;a class="reference external" href="http://code.krister.ee/mailgun-digitalocean/"&gt;http://code.krister.ee/mailgun-digitalocean/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Looks like I just keep adding these to the custom resource&amp;nbsp;records.&lt;/p&gt;
+&lt;p&gt;I added email.mg &lt;span class="caps"&gt;CNAME&lt;/span&gt; to point to mailgun.org, and a krs._domainkey.mg to point to a really long string. By clicking the authorize, looks like everything&amp;nbsp;worked.&lt;/p&gt;
+&lt;p&gt;All right, back to the discourse&amp;nbsp;setup.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;ll launch the setup tool. Setup wants to create a 2 gig swap file. Fine by me. Following the defaults for mailgun set by: &lt;a class="reference external" href="https://github.com/discourse/discourse/blob/master/docs/INSTALL-email.md"&gt;https://github.com/discourse/discourse/blob/master/docs/&lt;span class="caps"&gt;INSTALL&lt;/span&gt;-email.md&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Now it asks for let&amp;#8217;s encrypt account email? Hmm, let&amp;#8217;s set that up real&amp;nbsp;quick.&lt;/p&gt;
+&lt;p&gt;Just enter an email and press enter, and everything will be&amp;nbsp;encrypted.&lt;/p&gt;
+&lt;p&gt;Discourse is now updating which is&amp;nbsp;fine.&lt;/p&gt;
+&lt;p&gt;I lost internet, but looks like everything worked fine.&amp;nbsp;Perfect.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;ll add the &lt;span class="caps"&gt;CNAME&lt;/span&gt; to the custom resource records. Whoops, looks that&amp;#8217;s not how to do&amp;nbsp;that.&lt;/p&gt;
+&lt;p&gt;I need to add it as a &amp;#8216;A&amp;#8217; resource and fix the domain name in my setup and rebuild the app using &lt;cite&gt;./launch rebuild app&lt;/cite&gt;&lt;/p&gt;
+&lt;p&gt;Sick. I&amp;#8217;ll add in some other fancy stuff, like Facebook, Google, Twitter, and Github&amp;nbsp;logins.&lt;/p&gt;
+&lt;p&gt;Now onto embedding. I&amp;#8217;m following this: &lt;a class="reference external" href="https://meta.discourse.org/t/embedding-discourse-comments-via-javascript/31963"&gt;https://meta.discourse.org/t/embedding-discourse-comments-via-javascript/31963&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The admin tab has a customize section. From there to embedding. Add the domain name and I&amp;#8217;ve got some html. Adding it to the theme of the article template and I should be&amp;nbsp;set.&lt;/p&gt;
+&lt;p&gt;Fingers&amp;nbsp;crossed.&lt;/p&gt;
+</content><category term="Blog"></category></entry><entry><title>Blog Implementation Stream of Conscious</title><link href="https://benhoff.net/blog-implementation.html" rel="alternate"></link><published>2017-06-04T21:27:00-05:00</published><updated>2017-06-04T21:27:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-06-04:/blog-implementation.html</id><summary type="html">&lt;p class="first last"&gt;Starting implementation of the blog as a work in&amp;nbsp;progress.&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;All right, let&amp;#8217;s start implementing a&amp;nbsp;blog.&lt;/p&gt;
+&lt;p&gt;First off, let&amp;#8217;s get the Github Pages up&amp;nbsp;first.&lt;/p&gt;
+&lt;p&gt;Going to &lt;a class="reference external" href="https://pages.github.com/"&gt;Github Pages site&lt;/a&gt; gives the&amp;nbsp;instructions.&lt;/p&gt;
+&lt;p&gt;I need to create a repository named after my username and push the repo. Easy enough. Next I need to create an index.html file. Github recommends &amp;#8220;hello world&amp;#8221;. Sounds good to&amp;nbsp;me.&lt;/p&gt;
+&lt;p&gt;Using git to add and push my local repo up to the newly created repository. Visiting benhoff.github.io now shows our the new web page, hello world!&amp;nbsp;Neat!&lt;/p&gt;
+&lt;p&gt;Cool, now that I&amp;#8217;ve got my page up, on to the static website generation. I&amp;#8217;ll start by installing pelican in a virtual&amp;nbsp;environment.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; mkdir swdev/blog
+
+&lt;span class="gp"&gt;$&lt;/span&gt; &lt;span class="nb"&gt;cd&lt;/span&gt; swdev/blog
+
+&lt;span class="gp"&gt;$&lt;/span&gt; python -m venv venv
+
+&lt;span class="gp"&gt;$&lt;/span&gt; &lt;span class="nb"&gt;source&lt;/span&gt;  venv bin activate
+
+&lt;span class="gp"&gt;(venv) $&lt;/span&gt; pip install pelican
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Pelican has a quick start. Hold my breath here&amp;nbsp;;)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;(venv) $&lt;/span&gt; pelican-quickstart
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Oh man, I need a blog title? Hoff&amp;#8217;s heroes? Let&amp;#8217;s just stick with Ben&amp;#8217;s Blog for now. The only other question I&amp;#8217;m stumped on is the generation of a Fabfile/Makefile. Let&amp;#8217;s say yes for now, and we can always delete it&amp;nbsp;later.&lt;/p&gt;
+&lt;p&gt;Looks like pelican is familiar with using Github pages.&amp;nbsp;Nice.&lt;/p&gt;
+&lt;p&gt;Awesome, the quickstart dumped a bunch of new files and folders into the directory. I&amp;#8217;ve already written an initial thoughts post about this blog. Let&amp;#8217;s dump that in the content&amp;nbsp;directory.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; mv initial_blog_thoughts.txt content/initial_blog_thoughts.rst
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I&amp;#8217;m following the content tutorial &lt;a class="reference external" href="http://docs.getpelican.com/en/stable/content.html"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;There&amp;#8217;s a bunch of metadata that pelcian says I&amp;#8217;m missing, including the date, tags, category, slug, authors, and summary. Let&amp;#8217;s go ahead and add all of&amp;nbsp;those.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;ll need to go through and add in some of the resturctured text for the post, but I&amp;#8217;ll do it&amp;nbsp;later.&lt;/p&gt;
+&lt;p&gt;Right now, I want to add in some &lt;tt class="docutils literal"&gt;pages&lt;/tt&gt;. According to Pelican, Pages are for _About_ and _Contact_ pages. That sounds&amp;nbsp;good.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; mkdir pages
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Uh, I thought I could create an &lt;tt class="docutils literal"&gt;index.html&lt;/tt&gt;? Doesn&amp;#8217;t look like I can, I&amp;#8217;ll just follow the next step in the tutorial and see where I end&amp;nbsp;up.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;(venv) $&lt;/span&gt; pelican /path/to/my/content
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Looks like the content needs to be the file directory and not the actual&amp;nbsp;content.&lt;/p&gt;
+&lt;p&gt;Nice, the output directory has an index file in it already. Let&amp;#8217;s check it out using my&amp;nbsp;browser.&lt;/p&gt;
+&lt;p&gt;Ok, I&amp;#8217;m not in love with the theme, but I can work with everything&amp;nbsp;else.&lt;/p&gt;
+&lt;p&gt;Let&amp;#8217;s push this up and do it&amp;nbsp;live.&lt;/p&gt;
+&lt;p&gt;Ok, not as easy as I would like. We&amp;#8217;re adventuring now. Pelican &lt;a class="reference external" href="http://docs.getpelican.com/en/stable/tips.html"&gt;recommends&lt;/a&gt; the use of &lt;cite&gt;ghp-import&lt;/cite&gt;. I hate this kind of adventuring, since I&amp;#8217;m pretty sure it&amp;#8217;s not going to work. Sigh. Here we&amp;nbsp;go.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;(venv) $&lt;/span&gt; pip install ghp-import
+
+&lt;span class="gp"&gt;(venv) $&lt;/span&gt; ghp-import output
+
+&lt;span class="gp"&gt;(venv) $&lt;/span&gt; git push git@github.com:benhoff/benhoff.github.io.git gh-pages:master
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Yea, that didn&amp;#8217;t work. Looks like since I&amp;#8217;ve already pushed I&amp;#8217;m going to have issues. Color me surprised. I swear, this is my surprised&amp;nbsp;face.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;ve now got a &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;gh-pages&lt;/span&gt;&lt;/tt&gt; branch. That might be worth looking into. After some digging looks like I need to push the gh-pages&amp;nbsp;branch.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; git push origin gh-pages
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That didn&amp;#8217;t appear to work. Maybe deleting my old &amp;#8220;hello world&amp;#8221; index file will&amp;nbsp;help.&lt;/p&gt;
+&lt;p&gt;Nope. Now we&amp;#8217;re just 404ing. Looks like for a user page, content must be in the master. Well screw that. Let&amp;#8217;s create a new repo for the blog code and then I&amp;#8217;ll just push the github.io pages&amp;nbsp;separate.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;New repo named&amp;nbsp;`blog`&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; git remote set-url git@github.com:benhoff/blog.git
+
+&lt;span class="gp"&gt;$&lt;/span&gt; git remote add publish git@github.com:benhoff/benhoff.github.io
+
+&lt;span class="gp"&gt;$&lt;/span&gt; git push -f publish gh-pages:master
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I&amp;#8217;ll still have to manually push the gh-pages branch, but this is good enough for&amp;nbsp;now.&lt;/p&gt;
+</content><category term="Blog"></category><category term="blog"></category><category term="implementation"></category></entry><entry><title>Blog Initial Tech Stack Thoughts</title><link href="https://benhoff.net/blog-tech-stack-thoughts.html" rel="alternate"></link><published>2017-06-04T20:30:00-05:00</published><updated>2017-06-04T20:35:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-06-04:/blog-tech-stack-thoughts.html</id><summary type="html">&lt;p class="first last"&gt;Walking through the initial tech stack considerations for a new&amp;nbsp;blog.&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;Ok, let&amp;#8217;s start a&amp;nbsp;blog.&lt;/p&gt;
+&lt;p&gt;First of all, we need a tech stack. My initial thoughts are to use a static site generator. None of the blog code needs to be dynamic, and I can import a javascript comment system (such as discus) later. Probably end up using google analytics as&amp;nbsp;well.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;ll be using either markdown or restructured text so that I can track the blog configuration using&amp;nbsp;git.&lt;/p&gt;
+&lt;p&gt;Perfect, so we&amp;#8217;ve got a static site generator, markdown/restructured text, third party analytics and commenting&amp;#8230; now on to hosting. Since I don&amp;#8217;t feel like taking on the hosting thing for now, and the domain name isn&amp;#8217;t important, let&amp;#8217;s just stick with github pages. I&amp;#8217;m pretty sure it&amp;#8217;s&amp;nbsp;free.&lt;/p&gt;
+&lt;p&gt;The only other things that I would like would be some responsive design (I primarily read using my smart phone) and some way to embed a jupyter notebook directly in the&amp;nbsp;page.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;ll save the responsive design for another day (and a more complicated folder directory as well), but the desire for jupyter notebook means I&amp;#8217;ll probably be using some sort of python stack instead of the (likely more popular) Github incarnation of&amp;nbsp;Jekyll.&lt;/p&gt;
+&lt;p&gt;A quick google search shows that Pelican is likely the largest/most supported python static site generator. Looks like it can work with either markdown or restructured text (I&amp;#8217;ll probably stick with restructured text since I&amp;#8217;ve written some &lt;span class="caps"&gt;README&lt;/span&gt;&amp;#8217;s with it). Perfect. Another quick search shows there&amp;#8217;s a plugin that allows for Jupyter-Notebooks to be in embedded. We&amp;#8217;re cooking with fire now. So let&amp;#8217;s review our&amp;nbsp;tech.&lt;/p&gt;
 &lt;ul class="simple"&gt;
-&lt;li&gt;Git (version control)&lt;/li&gt;
-&lt;li&gt;Resturctured Text (text markup)&lt;/li&gt;
-&lt;li&gt;Github Pages (website hosting/Domain)&lt;/li&gt;
-&lt;li&gt;Pelican (static site generator)&lt;/li&gt;
+&lt;li&gt;Git (version&amp;nbsp;control)&lt;/li&gt;
+&lt;li&gt;Resturctured Text (text&amp;nbsp;markup)&lt;/li&gt;
+&lt;li&gt;Github Pages (website&amp;nbsp;hosting/Domain)&lt;/li&gt;
+&lt;li&gt;Pelican (static site&amp;nbsp;generator)&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Tech to be implemented later (third party and potentially hard)&lt;/p&gt;
+&lt;p&gt;Tech to be implemented later (third party and potentially&amp;nbsp;hard)&lt;/p&gt;
 &lt;ul class="simple"&gt;
-&lt;li&gt;Disqus (comments)&lt;/li&gt;
-&lt;li&gt;Google Analytics (analytics)&lt;/li&gt;
+&lt;li&gt;Discourse&amp;nbsp;(comments)&lt;/li&gt;
+&lt;li&gt;Google Analytics&amp;nbsp;(analytics)&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Aweomse, let's start implementing.&lt;/p&gt;
-</content><category term="blog"></category><category term="tech"></category><category term="stack"></category></entry></feed>
+&lt;p&gt;Awesome, let&amp;#8217;s start&amp;nbsp;implementing.&lt;/p&gt;
+</content><category term="Blog"></category><category term="blog"></category><category term="tech"></category><category term="stack"></category></entry></feed>

@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>PyQt Signals and Slots</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/pyqt-signals-slots.html">
+    <meta name="twitter:title" content="Ben's Blog ~ PyQt Signals and Slots">
+    <meta name="twitter:description" content="Figuring out how to use signals and slots">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ PyQt Signals and Slots"/>
+    <meta property="og:description" content="Figuring out how to use signals and slots"/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li class="active"><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/pyqt-signals-slots.html" rel="bookmark"
+                                                  title="Permalink to PyQt Signals and Slots">PyQt Signals and&nbsp;Slots</a></h2>
+            <div class="entry-content blog-post">
+                <p>As part of our <a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst">PyQt Tutorial series</a>, we&#8217;ve gone through some basic <a class="reference external" href="https://benhoff.net/pyqt-layout-design.rst">layout management</a> in addition to a conversation about some <a class="reference external" href="https://benhoff.net/qt-interface-design.rst">interface design</a>&#8230; but now when I click buttons I want things to&nbsp;happen!</p>
+<p>In order to achieve that goal, we&#8217;re going to have to learn about signals and&nbsp;slots.</p>
+<p>Let me let you in on a little secret. Signals and slots? They&#8217;re magical. Seriously, they are pretty&nbsp;cool.</p>
+<p>Let&#8217;s go back to our face recognition example. If you&#8217;re jumping around, you can catch up to the source code that we&#8217;re starting at <a class="reference external" href="https://github.com/benhoff/blog/blob/master/scripts/pyqt-layout-design.py">here</a>. This time, since we know layouts due to the <a class="reference external" href="https://benhoff.net/pyqt-layout-design.rst">layout management</a> post, we&#8217;re going to build our own widget so that we can better hook up our signals and&nbsp;slots.</p>
+<p>This is going to track closely to the <a class="reference external" href="https://benhoff.net/face-detection-in-pyqt.rst">face detection post</a> where I originally created this&nbsp;widget.</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">facerecog</span> <span class="kn">import</span> <span class="p">(</span><span class="n">RecordVideo</span><span class="p">,</span>
+                       <span class="n">FaceDetectionWidget</span><span class="p">,</span>
+                       <span class="n">get_haarcascade_filepath</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">FaceRecogControl</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+         <span class="n">haar_filepath</span> <span class="o">=</span> <span class="n">get_haarcascade_filepath</span><span class="p">()</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">face_detect_widget</span> <span class="o">=</span> <span class="n">FaceDetectionWidget</span><span class="p">(</span><span class="n">haar_filepath</span><span class="p">)</span>
+
+         <span class="bp">self</span><span class="o">.</span><span class="n">video_recording</span> <span class="o">=</span> <span class="n">RecordVideo</span><span class="p">()</span>
+         <span class="n">record_button</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Run&#39;</span><span class="p">)</span>
+
+         <span class="n">layout</span> <span class="o">=</span> <span class="n">Qtwidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">face_detect_widget</span><span class="p">)</span>
+         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">record_button</span><span class="p">)</span>
+
+         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+<p>You&#8217;ll notice that in the code above, I didn&#8217;t put the <tt class="docutils literal">QPushButton</tt> (instance member name of <tt class="docutils literal">record_button</tt>), as a instance member. Since I added the push button to our layout, the layout will actually keep a reference to the instance, preventing garbage&nbsp;collection.</p>
+<p>So all of that code should be review. Create a layout, add some widgets to the layout, and then set the layout on our&nbsp;widget.</p>
+<p>Now let&#8217;s go ahead and wire our creation up using signals and&nbsp;slots.</p>
+<p>As the <a class="reference external" href="http://doc.qt.io/qt-5/signalsandslots.html">documentation states</a>, signals and slots are used for communication between objects. In this case, we want to communicate between our push button object and our record video object. Specially, when we push the &#8220;Run&#8221; button, we want our video recording object to start&nbsp;recording.</p>
+<p>So looking at the <a class="reference external" href="http://doc.qt.io/qt-5/qabstractbutton.html#signals">push button documentation</a>, we can see that we have several signals available to us. The one we&#8217;re interested in is <tt class="docutils literal">clicked</tt>. Now the function that we want called after our button is <tt class="docutils literal">clicked</tt> is the <tt class="docutils literal">start_recording</tt> method on the <tt class="docutils literal">VideoRecord</tt> instance. To do this, we&#8217;ll call the <tt class="docutils literal">connect</tt> method on the <tt class="docutils literal">clicked</tt> class instance and pass our <tt class="docutils literal">start_recording</tt> method in as the argument. We also need to wire our <tt class="docutils literal">image_data</tt> signal to our <tt class="docutils literal">image_data_slot</tt>. That&#8217;s a lot of words. Let&#8217;s see it in&nbsp;action.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FaceRecogControl</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+         <span class="n">haar_filepath</span> <span class="o">=</span> <span class="n">get_haarcascade_filepath</span><span class="p">()</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">face_detect_widget</span> <span class="o">=</span> <span class="n">FaceDetectionWidget</span><span class="p">(</span><span class="n">haar_filepath</span><span class="p">)</span>
+
+         <span class="bp">self</span><span class="o">.</span><span class="n">video_recording</span> <span class="o">=</span> <span class="n">RecordVideo</span><span class="p">()</span>
+         <span class="n">record_button</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Run&#39;</span><span class="p">)</span>
+
+         <span class="n">layout</span> <span class="o">=</span> <span class="n">Qtwidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">face_detect_widget</span><span class="p">)</span>
+         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">record_button</span><span class="p">)</span>
+
+         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+
+         <span class="c1"># Connect our signal `clicked` to our method `start_recording`</span>
+         <span class="n">record_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">video_recording</span><span class="o">.</span><span class="n">start_recording</span><span class="p">)</span>
+
+         <span class="c1"># alias out the method call `image_data_slot` to make the code</span>
+         <span class="c1"># line shorter</span>
+         <span class="n">image_data_slot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_detect_widget</span><span class="o">.</span><span class="n">image_data_slot</span>
+
+         <span class="c1"># connect our signal `image_data` to our method `image_data_slot`</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">video_recording</span><span class="o">.</span><span class="n">image_data</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">image_data_slot</span><span class="p">)</span>
+</pre></div>
+<p>In PyQt, we can connect signals to any method call as long as the signatures match. In the case of our <tt class="docutils literal">clicked</tt> method, no arguments are transmitted when the signal is emitted. However, if we look at the <a class="reference external" href="http://doc.qt.io/qt-5/qcombobox.html">QComboBox signal documentation</a>, we&#8217;ll see that some of the signals (<tt class="docutils literal">activated</tt> for example) emit arguments that we need to catch in our method&nbsp;call.</p>
+<p>Let&#8217;s go ahead and define our own custom signal. For example, maybe we want to transmit a signal whenever a face is detected in our widget. Let&#8217;s go ahead and subclass our <tt class="docutils literal">FaceDetectionWidget</tt>. We&#8217;ll create a <tt class="docutils literal">face_detected</tt> signal and override our <tt class="docutils literal">image_data_slot</tt> method to emit the face detected signal whenever we find a&nbsp;face.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FaceSignalWidget</span><span class="p">(</span><span class="n">FaceDetectionWidget</span><span class="p">):</span>
+     <span class="c1"># Create our signal</span>
+     <span class="n">face_detected</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
+
+     <span class="k">def</span> <span class="nf">image_data_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_data</span><span class="p">):</span>
+         <span class="n">faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_faces</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
+         <span class="c1"># If faces our found, `emit` our signal</span>
+         <span class="k">if</span> <span class="n">faces</span><span class="p">:</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">face_detected</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+
+         <span class="c1"># NOTE: this code is same as base class ----------------------------</span>
+         <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+             <span class="n">cv2</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">image_data</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">w</span><span class="p">,</span> <span class="n">y</span><span class="o">+</span><span class="n">h</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_red</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span>
+
+         <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qimage</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
+         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">():</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+
+         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+         <span class="c1"># -----------------------------------------------------------------</span>
+</pre></div>
+<p>Notice that we call the <tt class="docutils literal">emit</tt> method on the <tt class="docutils literal">face_detected</tt> signal.</p>
+<p>But how do we emit arguments? Well we&#8217;ll need to define the arguments that we want to pass in our signal. So let&#8217;s say that we not only want to emit the fact that we detected a face, but we want to emit the coordinates of the face as&nbsp;well.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FaceSignalWidget</span><span class="p">(</span><span class="n">FaceDetectionWidget</span><span class="p">):</span>
+     <span class="n">face_detected</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
+     <span class="c1"># define our `face_detection_coords` signal</span>
+     <span class="n">face_detection_coords</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+
+     <span class="k">def</span> <span class="nf">image_data_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_data</span><span class="p">):</span>
+         <span class="n">faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_faces</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
+         <span class="c1"># If faces our found, `emit` our signal</span>
+         <span class="k">if</span> <span class="n">faces</span><span class="p">:</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">face_detected</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+
+         <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+             <span class="n">cv2</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">image_data</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">w</span><span class="p">,</span> <span class="n">y</span><span class="o">+</span><span class="n">h</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_red</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span>
+             <span class="c1"># emit the coordinates, or at least the (x,y), width and height</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">face_detection_coords</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+         <span class="c1"># NOTE: this code is same as base class ----------------------------</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qimage</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
+         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">():</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+
+         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+         <span class="c1"># -----------------------------------------------------------------</span>
+</pre></div>
+<p>Note that signals are always defined as class variables instead of instance variables. If you&#8217;re confused about the difference, this <a class="reference external" href="https://stackoverflow.com/questions/8959097/what-is-the-difference-between-class-and-instance-variables">stack overflow post</a> does a good job of differentiating the&nbsp;two.</p>
+<p>That should be enough to get you started. Be sure to check out the <a class="reference external" href="http://pyqt.sourceforge.net/Docs/PyQt5/signals_slots.html">PyQt documentation on signals and slots</a> for a more in depth&nbsp;treatment.</p>
+
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/pyqt.html" rel="bookmark"
+                                               title="Permalink to PyQt">[ PyQt ]</a></span>
+                <span class="post_date">Fri 21 July 2017</span>
+                <div><span>Tags : </span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/pyqt-signals-slots.html&text=PyQt Signals and Slots&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/pyqt-signals-slots.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/pyqt-signals-slots.html&t=PyQt Signals and Slots"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/pyqt-signals-slots.html&title=PyQt Signals and Slots"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=PyQt Signals and Slots&amp;body=Viens découvrir un article à propos de [PyQt Signals and Slots] sur le site de Ben Hoff. https://benhoff.net/pyqt-signals-slots.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/pyqt-signals-slots.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>

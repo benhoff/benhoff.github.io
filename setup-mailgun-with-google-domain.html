@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>Setup Mailgun with Google Domain</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/setup-mailgun-with-google-domain.html">
+    <meta name="twitter:title" content="Ben's Blog ~ Setup Mailgun with Google Domain">
+    <meta name="twitter:description" content="Setting up the DNS configuration of Mailgun for Google Domain">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ Setup Mailgun with Google Domain"/>
+    <meta property="og:description" content="Setting up the DNS configuration of Mailgun for Google Domain"/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li class="active"><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/setup-mailgun-with-google-domain.html" rel="bookmark"
+                                                  title="Permalink to Setup Mailgun with Google Domain">Setup Mailgun with Google&nbsp;Domain</a></h2>
+            <div class="entry-content blog-post">
+                <p>Right, let&#8217;s setup Mailgun. I&#8217;m using Mailgun for my Discourse&nbsp;install.</p>
+<p>The first step is to add your&nbsp;domain.</p>
+<p>Mailgun is going to recommend that you use a subdomain, such as <em>mg.mydomain.com</em>
+Whether you want to do that or not is up to you, the steps will be similar. I&#8217;m not going to. So for the sake of argument here, the domain that we are setting up is <em>mydomain.com</em></p>
+<p>Mailgun is going to give you 4 steps. We will need to go <a class="reference external" href="https://domains.google/#/">Google Domains</a>. Click the <em>Manage My Domains</em>, and then click the <em><span class="caps">DNS</span></em> button on the domain of&nbsp;interest.</p>
+<p>Once you&#8217;re there, scroll all the way down to the section that is titled <em>Custom resource records</em>. It&#8217;ll look something like&nbsp;this:</p>
+<img alt="" src="https://benhoff.net/images/google-domain-1.png" style="width: 400px; height: 100px;" />
+<p>That accomplishes Step 1. <em>Go To Your <span class="caps">DNS</span> Provider</em> from the 4 step process in&nbsp;Mailgun.</p>
+<p>Under Step 2, <em>Add <span class="caps">DNS</span> Records For Sending</em> on the <strong>Mailgun</strong> site, there are three resources we need to add: <tt class="docutils literal"><span class="caps">TXT</span></tt>, <tt class="docutils literal"><span class="caps">MX</span></tt>, and a second <tt class="docutils literal"><span class="caps">MX</span></tt>.</p>
+<p>Let&#8217;s add the <tt class="docutils literal"><span class="caps">TXT</span></tt> first.</p>
+<p>The top bar that is slightly grayed out with a blue button &#8220;Add&#8221; button on the far right is the interface that we&#8217;ll be using to add these documents. If you have a subdomain, (e.g. &#8220;mg.mydomain.com&#8221;), the subdomain will go in the far left &#8220;Name&#8221; column, otherwise leave it blank. The &#8220;Type&#8221; drop down menu (second column from the left), we&#8217;ll change from &#8220;A&#8221; to &#8220;<span class="caps">TXT</span>&#8221;. You can leave the &#8220;<span class="caps">TTL</span>&#8221; column  as is. In the &#8220;Data&#8221; column, we&#8217;ll put in the <span class="caps">SPF</span> value &#8220;v=spf1 include:mailgun.org ~all&#8221;. Hit Add, and you should see the table update below the top&nbsp;bar.</p>
+<p>Next, we&#8217;ll add in the <span class="caps">DKIM</span>, or Domain Key. We&#8217;ll follow the same procedure, although this time you&#8217;ll need to add in the Hostname that Mailgun specifies. Change the &#8220;Type&#8221; from &#8220;A&#8221; to &#8220;<span class="caps">TXT</span>&#8221; and paste the value associated with the domain key into the &#8220;Data&#8221; column (should be in the form of <tt class="docutils literal"><span class="pre">k=rsa;p={a</span> bunch of letters}</tt>).</p>
+<p>Next we&#8217;ll add in the <tt class="docutils literal"><span class="caps">MX</span></tt> records.</p>
+<p>We&#8217;ll follow the same drill, subdomain (if you have one) in the far left, change the &#8220;Type&#8221; from &#8220;A&#8221; to &#8220;<span class="caps">MX</span>&#8221; and then paste the <tt class="docutils literal">mxa.mailgun.org.</tt> in the. You can either hit the plus sign on the right hand side of the &#8220;Data&#8221; column, or hit &#8220;Add&#8221; and then scroll down to the entry and click the &#8220;Edit&#8221; button. As a forewarning, Google will automatically add the number 10 to your record so <tt class="docutils literal">mxa.mailgun.org.</tt> will change to <tt class="docutils literal">10 mxa.mailgun.org.</tt>. Totally legit, don&#8217;t&nbsp;panic.</p>
+<p>Add in the second &#8220;<span class="caps">MX</span>&#8221; record <tt class="docutils literal">mxb.mailgun.org.</tt> and &#8220;Add&#8221; or save the&nbsp;record.</p>
+<p>Last, according to Step 3) we need to Add <span class="caps">DNS</span> Records for&nbsp;Tracking.</p>
+<p>Copy the Hostname that Mailgun provides under Step 3, change the &#8220;Type&#8221; from &#8220;A&#8221; to &#8220;<span class="caps">CNAME</span>&#8221; and enter in the value of <tt class="docutils literal">mailgun.org</tt> into the &#8220;Data&#8221; column. Click&nbsp;add.</p>
+<p>Step 4 is wait for your domain to verify. In my experience, it was almost instantaneous with&nbsp;Google.</p>
+<p>In the end it should look something (although not exactly) like&nbsp;this.</p>
+<img alt="" src="https://benhoff.net/images/google-domain-2.png" style="width: 600px; height: 424px;" />
+
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/random.html" rel="bookmark"
+                                               title="Permalink to Random">[ Random ]</a></span>
+                <span class="post_date">Wed 05 July 2017</span>
+                <div><span>Tags : </span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/setup-mailgun-with-google-domain.html&text=Setup Mailgun with Google Domain&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/setup-mailgun-with-google-domain.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/setup-mailgun-with-google-domain.html&t=Setup Mailgun with Google Domain"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/setup-mailgun-with-google-domain.html&title=Setup Mailgun with Google Domain"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=Setup Mailgun with Google Domain&amp;body=Viens découvrir un article à propos de [Setup Mailgun with Google Domain] sur le site de Ben Hoff. https://benhoff.net/setup-mailgun-with-google-domain.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/setup-mailgun-with-google-domain.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>

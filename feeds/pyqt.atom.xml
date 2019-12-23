@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Ben's Blog - PyQt</title><link href="https://benhoff.net/" rel="alternate"></link><link href="https://benhoff.net/feeds/pyqt.atom.xml" rel="self"></link><id>https://benhoff.net/</id><updated>2019-12-10T20:28:00-06:00</updated><entry><title>Integrating QCamera and QAbstractVideoSurface Together</title><link href="https://benhoff.net/qcamera-and-qabstractvideosurface.html" rel="alternate"></link><published>2019-12-10T20:28:00-06:00</published><updated>2019-12-10T20:28:00-06:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2019-12-10:/qcamera-and-qabstractvideosurface.html</id><summary type="html">&lt;p&gt;Working with a new client to integrate video and desktop&amp;nbsp;together&lt;/p&gt;</summary><content type="html">&lt;p&gt;I had a client approach me about doing a webcam integration user interface, which was great! I&amp;#8217;ve been looking (&lt;span class="caps"&gt;ITCHING&lt;/span&gt;) for a reason to play with Qt&amp;#8217;s video stack&amp;nbsp;again.&lt;/p&gt;
+&lt;p&gt;Specifically the last time I left off with my explorations with Qt, I really wanted to integrate an Augmented Reality demo together with a webcamera. I wanted to integrate it with the Qt3D framework to show off the ability to integrate it all. I never could figure out how to do it (see &lt;a href="https://stackoverflow.com/questions/50291828/how-to-display-an-image-in-qt3d"&gt;this Stackoverflow question&lt;/a&gt;), but that doesn&amp;#8217;t mean I had given up the&amp;nbsp;problem.&lt;/p&gt;
+&lt;p&gt;Being technology greedy, I was also interested in learning how Qt&amp;#8217; QVideoFilter classes worked (see &lt;a href="https://doc.qt.io/qt-5/qvideofilterrunnable.html"&gt;here&lt;/a&gt;), to create a snapchat&amp;nbsp;clone.&lt;/p&gt;
+&lt;p&gt;So you know, Augmented Reality, Snapchat, webcam-driven &lt;span class="caps"&gt;QML&lt;/span&gt; application. Just a casual Tuesday for me&amp;nbsp;really.&lt;/p&gt;
+&lt;p&gt;However I ran into issues getting to the data (and getting Qt3D to display an image as noted&amp;nbsp;above).&lt;/p&gt;
+&lt;p&gt;So when the client approached me to do an Qt and OpenCV integration, I knew I would finally have my chance to conquer Qt&amp;#8217;s QCamera&amp;nbsp;class.&lt;/p&gt;
+&lt;p&gt;Which is exactly what I&amp;nbsp;did.&lt;/p&gt;
+&lt;p&gt;So the QCamera class has a &lt;code&gt;setViewfinder&lt;/code&gt; method, where you can set an interface that can work with the raw data. In levels of concereteness to abstraction, the available classes are &lt;code&gt;QVideoWidget&lt;/code&gt;, &lt;code&gt;QCameraViefinder&lt;/code&gt; and &lt;code&gt;QAbstractVideoSurface&lt;/code&gt;. QVideoWidget is a fully featured widget, whereas &lt;code&gt;QAbstractVideoSurface&lt;/code&gt; is the abstract version ready to be subclassed and&amp;nbsp;implemented.&lt;/p&gt;
+&lt;p&gt;When you dig through the source code for the more concrete classes, you get exposed to a lot of raw OpenGL. Having done some OpenGL programming before, I kind of know OpenGL, but I&amp;#8217;m no expert. Additionally, it&amp;#8217;s not anything I wanted to introduce into the class I was teaching at the time. So I kind of punted on the whole&amp;nbsp;thing.&lt;/p&gt;
+&lt;p&gt;Creating a video course takes a lot of time, and I had to abandon any ideas that were too complex for my time frame. I couldn&amp;#8217;t figure out if the OpenGL implementation made the program significantly more robust, because I couldn&amp;#8217;t figure out if &lt;span class="caps"&gt;NOT&lt;/span&gt; implementing the program as OpenGL, would force me to download the data out of video memory and push it back up into video memory (a significant battery drainer for a mobile application). I don&amp;#8217;t think that is the case, but I didn&amp;#8217;t have time to explore. Luckily for this particular client, everything was on Desktop, so I didn&amp;#8217;t need to worry about the specific battery&amp;nbsp;constraints.&lt;/p&gt;
+&lt;p&gt;In order to implement QAbstractVideoSurface, you have to override/implement two methods: &lt;code&gt;supportedPixelFormats&lt;/code&gt; and &lt;code&gt;present&lt;/code&gt;. In the &lt;code&gt;supportedPixelFormats&lt;/code&gt; method, you describe to the rest of the framework which types of QVideoFrame data formats that your implementation can support. My understanding is, if the data comes in a format that you don&amp;#8217;t explicitly authorize, then the Qt framework uses the underlying system to convert the data into the format that you&amp;nbsp;want.&lt;/p&gt;
+&lt;p&gt;Again, running on desktop and for a &lt;span class="caps"&gt;MVP&lt;/span&gt;, this wasn&amp;#8217;t a big concern for&amp;nbsp;me.&lt;/p&gt;
+&lt;p&gt;Instead, I wanted the system to handle as much of the conversion as possible, so I only exposed a single video format, &lt;span class="caps"&gt;RGB32&lt;/span&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;VideoSurface&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QtMultimedia&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QAbstractVideoSurface&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;supportedPixelFormats&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;handle_type&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;handle_type&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;QtMultimedia&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QAbstractVideoBuffer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;NoHandle&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;QtMultimedia&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QVideoFrame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Format_RGB32&lt;/span&gt;&lt;span class="p"&gt;,]&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;result&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This leaves only the &lt;code&gt;present&lt;/code&gt; method. Present is where you actually handle the video data. I wanted to convert the video data into a format that I can use for the rest of my&amp;nbsp;program.&lt;/p&gt;
+&lt;p&gt;I still find the image data types in Qt to be slightly confusing (I always have to look them up). Broadly though, I use primarily either QImage or QPixmap. I know QPixmap is to be used for display images, and I still wanted to manipulate my image, so I settled on QImage. So I had to convert my QVideoFrame to a QImage. Easy&amp;nbsp;enough.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# class VideoSurface(QtMultimedia.QAbstractVideoSurface):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;present&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;QtMultimedia&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QVideoFrame&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;copy&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtMultimedia&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QVideoFrame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QtMultimedia&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QAbstractVideoBuffer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ReadOnly&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="n"&gt;image_format&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtMultimedia&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QVideoFrame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;imageFormatFromPixelFormat&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pixelFormat&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+
+        &lt;span class="n"&gt;my_image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtGui&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QImage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bits&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;width&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;height&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bytesPerLine&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="n"&gt;QtGui&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QImage&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_format&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+        &lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;unmap&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="c1"&gt;# Do something with your new `QImage` here!&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now I finally had what I wanted all that time ago! A simple example of low level access out of a QCamera. The only thing to do is wire it up to a&amp;nbsp;QCamera&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;camera&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtMultimedia&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QCamera&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;video_surface&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;VideoSurface&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;camera&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;unload&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;camera&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setViewfinder&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;video_surface&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;camera&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;start&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="PyQt"></category></entry><entry><title>PyQt Signals and Slots</title><link href="https://benhoff.net/pyqt-signals-slots.html" rel="alternate"></link><published>2017-07-21T07:40:00-05:00</published><updated>2017-07-21T07:40:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-07-21:/pyqt-signals-slots.html</id><summary type="html">&lt;p class="first last"&gt;Figuring out how to use signals and&amp;nbsp;slots&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;As part of our &lt;a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst"&gt;PyQt Tutorial series&lt;/a&gt;, we&amp;#8217;ve gone through some basic &lt;a class="reference external" href="https://benhoff.net/pyqt-layout-design.rst"&gt;layout management&lt;/a&gt; in addition to a conversation about some &lt;a class="reference external" href="https://benhoff.net/qt-interface-design.rst"&gt;interface design&lt;/a&gt;&amp;#8230; but now when I click buttons I want things to&amp;nbsp;happen!&lt;/p&gt;
+&lt;p&gt;In order to achieve that goal, we&amp;#8217;re going to have to learn about signals and&amp;nbsp;slots.&lt;/p&gt;
+&lt;p&gt;Let me let you in on a little secret. Signals and slots? They&amp;#8217;re magical. Seriously, they are pretty&amp;nbsp;cool.&lt;/p&gt;
+&lt;p&gt;Let&amp;#8217;s go back to our face recognition example. If you&amp;#8217;re jumping around, you can catch up to the source code that we&amp;#8217;re starting at &lt;a class="reference external" href="https://github.com/benhoff/blog/blob/master/scripts/pyqt-layout-design.py"&gt;here&lt;/a&gt;. This time, since we know layouts due to the &lt;a class="reference external" href="https://benhoff.net/pyqt-layout-design.rst"&gt;layout management&lt;/a&gt; post, we&amp;#8217;re going to build our own widget so that we can better hook up our signals and&amp;nbsp;slots.&lt;/p&gt;
+&lt;p&gt;This is going to track closely to the &lt;a class="reference external" href="https://benhoff.net/face-detection-in-pyqt.rst"&gt;face detection post&lt;/a&gt; where I originally created this&amp;nbsp;widget.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;PyQt5&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;QtCore&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;facerecog&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;RecordVideo&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                       &lt;span class="n"&gt;FaceDetectionWidget&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                       &lt;span class="n"&gt;get_haarcascade_filepath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FaceRecogControl&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QWidget&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+         &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+         &lt;span class="n"&gt;haar_filepath&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;get_haarcascade_filepath&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detect_widget&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;FaceDetectionWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;haar_filepath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;video_recording&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;RecordVideo&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+         &lt;span class="n"&gt;record_button&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QPushButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Run&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+         &lt;span class="n"&gt;layout&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Qtwidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QVBoxLayout&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+         &lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detect_widget&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+         &lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;record_button&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setLayout&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You&amp;#8217;ll notice that in the code above, I didn&amp;#8217;t put the &lt;tt class="docutils literal"&gt;QPushButton&lt;/tt&gt; (instance member name of &lt;tt class="docutils literal"&gt;record_button&lt;/tt&gt;), as a instance member. Since I added the push button to our layout, the layout will actually keep a reference to the instance, preventing garbage&amp;nbsp;collection.&lt;/p&gt;
+&lt;p&gt;So all of that code should be review. Create a layout, add some widgets to the layout, and then set the layout on our&amp;nbsp;widget.&lt;/p&gt;
+&lt;p&gt;Now let&amp;#8217;s go ahead and wire our creation up using signals and&amp;nbsp;slots.&lt;/p&gt;
+&lt;p&gt;As the &lt;a class="reference external" href="http://doc.qt.io/qt-5/signalsandslots.html"&gt;documentation states&lt;/a&gt;, signals and slots are used for communication between objects. In this case, we want to communicate between our push button object and our record video object. Specially, when we push the &amp;#8220;Run&amp;#8221; button, we want our video recording object to start&amp;nbsp;recording.&lt;/p&gt;
+&lt;p&gt;So looking at the &lt;a class="reference external" href="http://doc.qt.io/qt-5/qabstractbutton.html#signals"&gt;push button documentation&lt;/a&gt;, we can see that we have several signals available to us. The one we&amp;#8217;re interested in is &lt;tt class="docutils literal"&gt;clicked&lt;/tt&gt;. Now the function that we want called after our button is &lt;tt class="docutils literal"&gt;clicked&lt;/tt&gt; is the &lt;tt class="docutils literal"&gt;start_recording&lt;/tt&gt; method on the &lt;tt class="docutils literal"&gt;VideoRecord&lt;/tt&gt; instance. To do this, we&amp;#8217;ll call the &lt;tt class="docutils literal"&gt;connect&lt;/tt&gt; method on the &lt;tt class="docutils literal"&gt;clicked&lt;/tt&gt; class instance and pass our &lt;tt class="docutils literal"&gt;start_recording&lt;/tt&gt; method in as the argument. We also need to wire our &lt;tt class="docutils literal"&gt;image_data&lt;/tt&gt; signal to our &lt;tt class="docutils literal"&gt;image_data_slot&lt;/tt&gt;. That&amp;#8217;s a lot of words. Let&amp;#8217;s see it in&amp;nbsp;action.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FaceRecogControl&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QWidget&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+         &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+         &lt;span class="n"&gt;haar_filepath&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;get_haarcascade_filepath&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detect_widget&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;FaceDetectionWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;haar_filepath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;video_recording&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;RecordVideo&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+         &lt;span class="n"&gt;record_button&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QPushButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Run&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+         &lt;span class="n"&gt;layout&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Qtwidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QVBoxLayout&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+         &lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detect_widget&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+         &lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;record_button&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setLayout&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+         &lt;span class="c1"&gt;# Connect our signal `clicked` to our method `start_recording`&lt;/span&gt;
+         &lt;span class="n"&gt;record_button&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;clicked&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;video_recording&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;start_recording&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+         &lt;span class="c1"&gt;# alias out the method call `image_data_slot` to make the code&lt;/span&gt;
+         &lt;span class="c1"&gt;# line shorter&lt;/span&gt;
+         &lt;span class="n"&gt;image_data_slot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detect_widget&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image_data_slot&lt;/span&gt;
+
+         &lt;span class="c1"&gt;# connect our signal `image_data` to our method `image_data_slot`&lt;/span&gt;
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;video_recording&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data_slot&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In PyQt, we can connect signals to any method call as long as the signatures match. In the case of our &lt;tt class="docutils literal"&gt;clicked&lt;/tt&gt; method, no arguments are transmitted when the signal is emitted. However, if we look at the &lt;a class="reference external" href="http://doc.qt.io/qt-5/qcombobox.html"&gt;QComboBox signal documentation&lt;/a&gt;, we&amp;#8217;ll see that some of the signals (&lt;tt class="docutils literal"&gt;activated&lt;/tt&gt; for example) emit arguments that we need to catch in our method&amp;nbsp;call.&lt;/p&gt;
+&lt;p&gt;Let&amp;#8217;s go ahead and define our own custom signal. For example, maybe we want to transmit a signal whenever a face is detected in our widget. Let&amp;#8217;s go ahead and subclass our &lt;tt class="docutils literal"&gt;FaceDetectionWidget&lt;/tt&gt;. We&amp;#8217;ll create a &lt;tt class="docutils literal"&gt;face_detected&lt;/tt&gt; signal and override our &lt;tt class="docutils literal"&gt;image_data_slot&lt;/tt&gt; method to emit the face detected signal whenever we find a&amp;nbsp;face.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FaceSignalWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;FaceDetectionWidget&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+     &lt;span class="c1"&gt;# Create our signal&lt;/span&gt;
+     &lt;span class="n"&gt;face_detected&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtCore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pyqtSignal&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;image_data_slot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+         &lt;span class="n"&gt;faces&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;detect_faces&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+         &lt;span class="c1"&gt;# If faces our found, `emit` our signal&lt;/span&gt;
+         &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;faces&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+             &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detected&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;emit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+         &lt;span class="c1"&gt;# NOTE: this code is same as base class ----------------------------&lt;/span&gt;
+         &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;faces&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+             &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;rectangle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_red&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_width&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_qimage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+         &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+             &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setFixedSize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;update&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+         &lt;span class="c1"&gt;# -----------------------------------------------------------------&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Notice that we call the &lt;tt class="docutils literal"&gt;emit&lt;/tt&gt; method on the &lt;tt class="docutils literal"&gt;face_detected&lt;/tt&gt; signal.&lt;/p&gt;
+&lt;p&gt;But how do we emit arguments? Well we&amp;#8217;ll need to define the arguments that we want to pass in our signal. So let&amp;#8217;s say that we not only want to emit the fact that we detected a face, but we want to emit the coordinates of the face as&amp;nbsp;well.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FaceSignalWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;FaceDetectionWidget&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+     &lt;span class="n"&gt;face_detected&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtCore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pyqtSignal&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+     &lt;span class="c1"&gt;# define our `face_detection_coords` signal&lt;/span&gt;
+     &lt;span class="n"&gt;face_detection_coords&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtCore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pyqtSignal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;image_data_slot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+         &lt;span class="n"&gt;faces&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;detect_faces&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+         &lt;span class="c1"&gt;# If faces our found, `emit` our signal&lt;/span&gt;
+         &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;faces&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+             &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detected&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;emit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+         &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;faces&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+             &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;rectangle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_red&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_width&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+             &lt;span class="c1"&gt;# emit the coordinates, or at least the (x,y), width and height&lt;/span&gt;
+             &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detection_coords&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;emit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+         &lt;span class="c1"&gt;# NOTE: this code is same as base class ----------------------------&lt;/span&gt;
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_qimage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+         &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+             &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setFixedSize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+
+         &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;update&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+         &lt;span class="c1"&gt;# -----------------------------------------------------------------&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Note that signals are always defined as class variables instead of instance variables. If you&amp;#8217;re confused about the difference, this &lt;a class="reference external" href="https://stackoverflow.com/questions/8959097/what-is-the-difference-between-class-and-instance-variables"&gt;stack overflow post&lt;/a&gt; does a good job of differentiating the&amp;nbsp;two.&lt;/p&gt;
+&lt;p&gt;That should be enough to get you started. Be sure to check out the &lt;a class="reference external" href="http://pyqt.sourceforge.net/Docs/PyQt5/signals_slots.html"&gt;PyQt documentation on signals and slots&lt;/a&gt; for a more in depth&amp;nbsp;treatment.&lt;/p&gt;
+</content><category term="PyQt"></category></entry><entry><title>PyQt Tutorial Index</title><link href="https://benhoff.net/pyqt-tutorial-index.html" rel="alternate"></link><published>2017-07-20T23:09:00-05:00</published><updated>2017-07-20T23:09:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-07-20:/pyqt-tutorial-index.html</id><summary type="html">&lt;p&gt;Alright, this is top level index showing how to follow the PyQt Tutorial. Feel free to jump in wherever you need&amp;nbsp;to.&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="30%" /&gt;
+&lt;col width="70%" /&gt;
+&lt;/colgroup&gt;
+&lt;thead valign="bottom"&gt;
+&lt;tr&gt;&lt;th class="head"&gt;Article&lt;/th&gt;
+&lt;th class="head"&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a class="reference external" href="https://benhoff.net/pyqt-hello-world.rst"&gt;Hello World&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Create a &amp;#8220;Hello World&amp;#8221; Graphical User Interface.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a class="reference external" href="https://benhoff.net/qt-interface-design.rst"&gt;Interface Design&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Review the three major types of Interfaces.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a class="reference external" href="https://benhoff.net/pyqt-layout-design.rst"&gt;Layout Mangement&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Hands on approach how to create …&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</summary><content type="html">&lt;p&gt;Alright, this is top level index showing how to follow the PyQt Tutorial. Feel free to jump in wherever you need&amp;nbsp;to.&lt;/p&gt;
+&lt;table border="1" class="docutils"&gt;
+&lt;colgroup&gt;
+&lt;col width="30%" /&gt;
+&lt;col width="70%" /&gt;
+&lt;/colgroup&gt;
+&lt;thead valign="bottom"&gt;
+&lt;tr&gt;&lt;th class="head"&gt;Article&lt;/th&gt;
+&lt;th class="head"&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a class="reference external" href="https://benhoff.net/pyqt-hello-world.rst"&gt;Hello World&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Create a &amp;#8220;Hello World&amp;#8221; Graphical User Interface.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a class="reference external" href="https://benhoff.net/qt-interface-design.rst"&gt;Interface Design&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Review the three major types of Interfaces.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a class="reference external" href="https://benhoff.net/pyqt-layout-design.rst"&gt;Layout Mangement&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Hands on approach how to create Interfaces using
+layouts in Qt.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a class="reference external" href="https://benhoff.net/pyqt-signals-slots.rst"&gt;Signals and Slots&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Overview of signals and slots&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+</content><category term="PyQt"></category></entry><entry><title>PyQt Layout Design</title><link href="https://benhoff.net/pyqt-layout-design.html" rel="alternate"></link><published>2017-07-17T16:14:00-05:00</published><updated>2017-07-17T16:14:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-07-17:/pyqt-layout-design.html</id><summary type="html">&lt;p class="first last"&gt;Let&amp;#8217;s work on creating a single interface design face recognition&amp;nbsp;application.&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;As part of our &lt;a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst"&gt;PyQt Tutorial series&lt;/a&gt; we&amp;#8217;ve built a &lt;a class="reference external" href="https://benhoff.net/pyqt-hello-world.rst"&gt;Hello World&lt;/a&gt; &lt;span class="caps"&gt;GUI&lt;/span&gt; application and gone through some basic &lt;a class="reference external" href="https://benhoff.net/qt-interface-design.rst"&gt;Interface Design&lt;/a&gt; options. In this section, we&amp;#8217;re going to implement the first type of Interface, a Single Document Interface. We&amp;#8217;re going to create a Face Recognition Application, but since I&amp;#8217;d like to focus on the PyQt &lt;span class="caps"&gt;GUI&lt;/span&gt; development process, the actual face recognition part will be separate from this set of&amp;nbsp;tutorials.&lt;/p&gt;
+&lt;p&gt;If you&amp;#8217;re just jumping in here, check out &lt;a class="reference external" href="https://github.com/benhoff/blog/blob/master/scripts/pyqt-hello-world.py"&gt;this link&lt;/a&gt; to see the code that we&amp;#8217;re starting&amp;nbsp;with.&lt;/p&gt;
+&lt;p&gt;So let&amp;#8217;s install a face recognition ready&amp;nbsp;widget.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; pip install facerecog
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And then we&amp;#8217;ll import it into our&amp;nbsp;program.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;facerecog&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;MainWidget&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;get_haarcascade_filepath&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you&amp;#8217;re interested in seeing the coding going on behind the face recognition piece, feel free to explore it in &lt;a class="reference external" href="https://benhoff.net/face-detection-in-pyqt.rst"&gt;this blog post&lt;/a&gt;. Otherwise, let&amp;#8217;s instantiate our face recognition widget and put it in our&amp;nbsp;program.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;PyQt5&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;QtCore&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;facerecog&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;MainWidget&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;get_haarcascade_filepath&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="c1"&gt;# We need to make the QApplication before our QMainWindow&lt;/span&gt;
+    &lt;span class="c1"&gt;# We also need to pass in our system argument values (sys.argv)&lt;/span&gt;
+    &lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QApplication&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;main_window&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QMainWindow&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Here&amp;#39;s that instantiation bit again.&lt;/span&gt;
+    &lt;span class="n"&gt;haar_filepath&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;get_haarcascade_filepath&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;main_widget&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;MainWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;haar_filepath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# QMainWindow requires a central widget. We&amp;#39;ll pass in our MainWidget here&lt;/span&gt;
+    &lt;span class="n"&gt;main_window&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setCentralWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;main_widget&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="c1"&gt;# Show our main window&lt;/span&gt;
+    &lt;span class="n"&gt;main_window&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="c1"&gt;# Start the event loop processing&lt;/span&gt;
+    &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="k"&gt;exec&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;img alt="" class="align-center" src="https://benhoff.net/images/face-recognition-success.png" /&gt;
+&lt;p&gt;Obviously this code isn&amp;#8217;t the whole story to the &lt;span class="caps"&gt;GUI&lt;/span&gt; development. But it demonstrates an important fact about Qt desktop &lt;span class="caps"&gt;GUI&lt;/span&gt; framework. Everything that the end user interfaces with is a widget. So in this case, since we already have a ready made widget, we can plug it in and send our user on their merry&amp;nbsp;way.&lt;/p&gt;
+&lt;p&gt;The end goal for most of our interface design then using the Qt framework will be to wrap our interface into widgets. So how do we do&amp;nbsp;that?&lt;/p&gt;
+&lt;p&gt;Well, as we talked about in the Hello World blog post, we can add in some functionality of a menu bar, status bar, dock widgets,&amp;nbsp;etc.&lt;/p&gt;
+&lt;img alt="" class="align-center" src="http://doc.qt.io/qt-5/images/mainwindowlayout.png" /&gt;
+&lt;p&gt;But most of the time what we want to do is group, or layout, multiple widgets in an area. The way to do that in Qt is through Layout&amp;nbsp;Management.&lt;/p&gt;
+&lt;p&gt;All QWidget classes use layouts to manage the life cycle of their subwidgets. In addition to managing the life cycle, ayouts&amp;nbsp;also:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Positioning of child&amp;nbsp;widgets.&lt;/li&gt;
+&lt;li&gt;Sensible default sizes for&amp;nbsp;windows.&lt;/li&gt;
+&lt;li&gt;Sensible minimum sizes for&amp;nbsp;windows.&lt;/li&gt;
+&lt;li&gt;Resize&amp;nbsp;handling.&lt;/li&gt;
+&lt;li&gt;Automatic updates when contents change:&lt;ul&gt;
+&lt;li&gt;Font size, text or other contents of child&amp;nbsp;widgets.&lt;/li&gt;
+&lt;li&gt;Hiding or showing a child&amp;nbsp;widget.&lt;/li&gt;
+&lt;li&gt;Removal of child&amp;nbsp;widgets.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now to be clear, the Qt Documentation does an better job then I will of explaining the in&amp;#8217;s and out&amp;#8217;s of layout management, so I&amp;#8217;d recommend you &lt;a class="reference external" href="http://doc.qt.io/qt-5/layout.html"&gt;check it out&lt;/a&gt;. But we&amp;#8217;ll go through the basics here of instantiating, using and setting layouts&amp;nbsp;here.&lt;/p&gt;
+&lt;p&gt;First we need a master widget that we can set the layout&amp;nbsp;on.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;QtWidgets&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MasterWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QWidget&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Then we need to pick which layout that we want to&amp;nbsp;use.&lt;/p&gt;
+&lt;p&gt;Some of my favorite layouts include &lt;tt class="docutils literal"&gt;QHBoxLayout&lt;/tt&gt; which arranges widgets horizontally, &lt;tt class="docutils literal"&gt;QVBoxLayout&lt;/tt&gt;, which arranges widgets vertically, and &lt;tt class="docutils literal"&gt;QGridLayout&lt;/tt&gt; which allows you to put things in a&amp;nbsp;grid.&lt;/p&gt;
+&lt;p&gt;Let&amp;#8217;s use a layout to stack a couple of widgets on top of each other. We&amp;#8217;ll do this using the &lt;tt class="docutils literal"&gt;addWidget&lt;/tt&gt; function on our instantiated layout. Once we&amp;#8217;ve added all of the widgets that we want, we&amp;#8217;ll then set the layout using the &lt;tt class="docutils literal"&gt;setLayout&lt;/tt&gt; method on our &lt;tt class="docutils literal"&gt;MasterWidget&lt;/tt&gt; class.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;QtWidgets&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MasterWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QWidget&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="c1"&gt;# Create a label, push button and line edit widgets&lt;/span&gt;
+        &lt;span class="n"&gt;label&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QLabel&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is a label&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;run_push_button&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QPushButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Click Me&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;line_edit&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QLineEdit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Default line edit text&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="c1"&gt;# create our layout, a vertical layout&lt;/span&gt;
+        &lt;span class="n"&gt;layout&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QVBoxLayout&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="c1"&gt;# add widgets&lt;/span&gt;
+        &lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;label&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line_edit&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;run_push_button&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="c1"&gt;# set the layout of our master widget&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setLayout&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This is the resulting gui for the above code, showing all of the widgets stacked&amp;nbsp;vertically.&lt;/p&gt;
+&lt;img alt="" class="align-center" src="https://benhoff.net/images/pyqt-layout-example.png" /&gt;
+&lt;p&gt;We could also use a grid layout. The &lt;span class="caps"&gt;API&lt;/span&gt; for that is a little different. Whenever we add a widget, we need to pass in the row and the column. I&amp;#8217;m going to do this using key word arguments so that you can see what is going on. If we remove the &lt;tt class="docutils literal"&gt;row&lt;/tt&gt; and &lt;tt class="docutils literal"&gt;column&lt;/tt&gt; key word arguments, this would still be valid code, as these are the positional arguments as&amp;nbsp;well.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;layout&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QGridLayout&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="c1"&gt;# add as row 0, column 0&lt;/span&gt;
+&lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;label&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="c1"&gt;# add as row 1, column 0&lt;/span&gt;
+&lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line_edit&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="c1"&gt;# add as row 1, column 1&lt;/span&gt;
+&lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;run_push_button&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Below, you can see the change in the appearance of our &lt;span class="caps"&gt;GUI&lt;/span&gt; with the above layout&amp;nbsp;changes.&lt;/p&gt;
+&lt;img alt="" class="align-center" src="https://benhoff.net/images/pyqt-layout-example-2.png" /&gt;
+&lt;p&gt;Layouts are a powerful way to add more widgets and control how those new widgets look in our &lt;span class="caps"&gt;GUI&lt;/span&gt;, so don&amp;#8217;t be afraid to use&amp;nbsp;them!&lt;/p&gt;
+&lt;div class="section" id="wrapup"&gt;
+&lt;h2&gt;Wrapup&lt;/h2&gt;
+&lt;p&gt;You can catch the source code for the tutorial up to this point &lt;a class="reference external" href="https://github.com/benhoff/blog/blob/master/scripts/pyqt-layout-design.py"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;There&amp;#8217;s only one problem with our &lt;span class="caps"&gt;GUI&lt;/span&gt; currently. If we click that push button, nothing happens. What&amp;#8217;s up with that? Well we need to connect our signals and slots together. Check out how to do that, in the &lt;a class="reference external" href="https://benhoff.net/pyqt-signals-slots.rst"&gt;Signals and Slots&lt;/a&gt; post. Or, if you&amp;#8217;re already familiar with how signals and slots work, feel free to skip ahead using &lt;a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst"&gt;this index&lt;/a&gt; of the entire&amp;nbsp;tutorial.&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="PyQt"></category></entry><entry><title>Face Detection with OpenCV and PyQt</title><link href="https://benhoff.net/face-detection-opencv-pyqt.html" rel="alternate"></link><published>2017-07-14T19:37:00-05:00</published><updated>2017-07-14T19:37:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-07-14:/face-detection-opencv-pyqt.html</id><summary type="html">&lt;p class="first last"&gt;Getting Face Detection working with OpenCV and&amp;nbsp;PyQt&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;Let&amp;#8217;s install some&amp;nbsp;stuff.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; pip install opencv-python numpy PyQt5
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Let&amp;#8217;s import some&amp;nbsp;stuff.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;cv2&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;numpy&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;np&lt;/span&gt;
+
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;PyQt5&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;QtCore&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;PyQt5&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;PyQt5&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;QtGui&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now we&amp;#8217;ll build this backwards, starting with the smallest pieces and working bigger. Let&amp;#8217;s start working on creating the video recording and getting the face coordinates&amp;nbsp;out.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;RecordVideo&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;camera_port&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;camera&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;VideoCapture&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;camera_port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;running&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;False&lt;/span&gt;
+
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;run&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;running&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;
+                &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;running&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                        &lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;camera&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+                        &lt;span class="c1"&gt;# TODO: detect faces now&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Awesome, now let&amp;#8217;s work on the facial&amp;nbsp;detection.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FaceDetection&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;haar_cascade_filepath&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classifier&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CascadeClassifier&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;haar_cascade_filepath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_min_size&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;detect_faces&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="c1"&gt;# haarclassifiers work better in black and white&lt;/span&gt;
+                &lt;span class="n"&gt;gray_image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cvtColor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;COLOR_BGR2GRAY&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="n"&gt;gray_image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;equalizeHist&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;grey_image&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+                &lt;span class="n"&gt;faces&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classifier&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;detectMultiScale&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;grey_image&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;scaleFactor&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;1.3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;minNeighbors&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;flags&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CASCADE_SCALE_IMAGE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;min_size&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_min_size&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+                &lt;span class="c1"&gt;# TODO: Paint on a surface and add the faces.&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Ok so we need something to paint on. This is where we need to switch gears a little bit. We&amp;#8217;re going to use Qt to paint on. So we&amp;#8217;ll need to rework some of classes to play nicely with&amp;nbsp;Qt.&lt;/p&gt;
+&lt;p&gt;We&amp;#8217;ll start by making our &lt;tt class="docutils literal"&gt;RecordVideo&lt;/tt&gt; a subclass of &lt;tt class="docutils literal"&gt;QObject&lt;/tt&gt;. We&amp;#8217;ll also create a signal called &lt;tt class="docutils literal"&gt;image_data&lt;/tt&gt; and have it emit a &lt;tt class="docutils literal"&gt;np.ndarray&lt;/tt&gt; in the &lt;tt class="docutils literal"&gt;timerEvent&lt;/tt&gt;. We&amp;#8217;ll use it in the &lt;tt class="docutils literal"&gt;timerEvent&lt;/tt&gt; so that we can keep it single&amp;nbsp;threaded.&lt;/p&gt;
+&lt;p&gt;If that sounds confusing, don&amp;#8217;t worry. The code isn&amp;#8217;t that&amp;nbsp;long.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;RecordVideo&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QtCore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QObject&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;image_data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtCore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pyqtSignal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ndarray&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;camera_port&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;camera&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;VideoCapture&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;camera_port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;timer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtCore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QBasicTimer&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;start_recording&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;timer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;start&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;timerEvent&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;timerId&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;timer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;timerId&lt;/span&gt;&lt;span class="p"&gt;()):&lt;/span&gt;
+                        &lt;span class="k"&gt;return&lt;/span&gt;
+
+                &lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;camera&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+                &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image_ready&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;emit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We need to extend our Face Detection as well. We&amp;#8217;ll make it a &lt;tt class="docutils literal"&gt;QWidget&lt;/tt&gt;, because we want to paint on it. We&amp;#8217;ll add a new method that converts our ndarray into a &lt;tt class="docutils literal"&gt;QImage&lt;/tt&gt;. The painting loop occasionally might be too slow, so we&amp;#8217;ll save the image to the class and call the &lt;tt class="docutils literal"&gt;update&lt;/tt&gt; method at the end of the slot. We&amp;#8217;ll draw the rectangle on into the data using the &lt;tt class="docutils literal"&gt;cv2.rectangle&lt;/tt&gt; method&amp;nbsp;call.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;FaceDetectionWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QWidget&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;haar_cascade_filepath&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classifier&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CascadeClassifier&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;haar_cascade_filepath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtGui&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QImage&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_red&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;255&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_width&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_min_size&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;detect_faces&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ndarray&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="c1"&gt;# haarclassifiers work better in black and white&lt;/span&gt;
+                &lt;span class="n"&gt;gray_image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cvtColor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;COLOR_BGR2GRAY&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="n"&gt;gray_image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;equalizeHist&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;gray_image&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+                &lt;span class="n"&gt;faces&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classifier&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;detectMultiScale&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;gray_image&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;scaleFactor&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;1.3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;minNeighbors&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;flags&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CASCADE_SCALE_IMAGE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;minSize&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_min_size&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+                &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;faces&lt;/span&gt;
+
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;image_data_slot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="n"&gt;faces&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;detect_faces&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;faces&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                        &lt;span class="n"&gt;cv2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;rectangle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_red&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_width&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_qimage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+                        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setFixedSize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;update&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get_qimage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ndarray&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="n"&gt;height&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;width&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;colors&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;
+                &lt;span class="n"&gt;bytesPerLine&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;width&lt;/span&gt;
+                &lt;span class="n"&gt;QImage&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtGui&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QImage&lt;/span&gt;
+
+                &lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QImage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;width&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;height&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;bytesPerLine&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;QImage&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Format_RGB888&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+                &lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;rgbSwapped&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+                &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;image&lt;/span&gt;
+
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;paintEvent&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="n"&gt;painter&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtGui&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QPainter&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="n"&gt;painter&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;drawImage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtGui&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QImage&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now let&amp;#8217;s tie these two together. We&amp;#8217;ll create a MainWidget class that instantiates both of our two custom classes, puts our widget in a Layout along with a start button. We also need to tie together both the image signal/slot and the click&amp;#8217;d and start recording&amp;nbsp;method.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MainWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QWidget&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;haarcascade_filepath&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="nb"&gt;super&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;parent&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="n"&gt;fp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;haarcascade_filepath&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detection_widget&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;FaceDetectionWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fp&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+                &lt;span class="c1"&gt;# TODO: set video port&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;record_video&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;RecordVideo&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run_button&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QPushButton&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Start&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+                &lt;span class="c1"&gt;# Connect the image data signal and slot together&lt;/span&gt;
+                &lt;span class="n"&gt;image_data_slot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detection_widget&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image_data_slot&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;record_video&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;image_data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image_data_slot&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="c1"&gt;# connect the run button to the start recording slot&lt;/span&gt;
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run_button&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;clicked&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;record_video&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;start_recording&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+                &lt;span class="c1"&gt;# Create and set the layout&lt;/span&gt;
+                &lt;span class="n"&gt;layout&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QVBoxLayout&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+                &lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;face_detection_widget&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                &lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run_button&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+                &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setLayout&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;layout&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now we just need to create our QApplication, QMainWindow, and our custom&amp;nbsp;MainWidget.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;haar_cascade_filepath&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QApplication&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="n"&gt;main_window&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QMainWindow&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;main_widget&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;MainWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;haar_cascade_filepath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;main_window&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setCentralWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;main_widget&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;main_window&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exec_&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now we need to pass in the haarcascade file. I saved it using this shell&amp;nbsp;script.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; curl https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml &amp;gt; haarcascade_frontalface_default.xml
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You&amp;#8217;ll have to change the code to match your local&amp;nbsp;setup.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;ll distribute this out on pypi so you can install it&amp;nbsp;eventually.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;script_dir&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dirname&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;realpath&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__file__&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="n"&gt;cascade_filepath&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;script_dir&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;..&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;data&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;haarcascade_frontalface_default.xml&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="n"&gt;cascade_filepath&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;abspath&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cascade_filepath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cascade_filepath&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;img alt="" src="https://benhoff.net/images/face-recognition-success.png" /&gt;
+&lt;p&gt;Success!&lt;/p&gt;
+&lt;p&gt;You can see all the source code &lt;a class="reference external" href="https://github.com/benhoff/blog/blob/master/scripts/face-detection-in-pyqt.py"&gt;here&lt;/a&gt;.&lt;/p&gt;
+</content><category term="PyQt"></category></entry><entry><title>Qt Interface Design</title><link href="https://benhoff.net/qt-interface-design.html" rel="alternate"></link><published>2017-06-26T17:21:00-05:00</published><updated>2017-06-26T17:21:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-06-26:/qt-interface-design.html</id><summary type="html">&lt;p class="first last"&gt;Reviewing types of interface design for&amp;nbsp;Qt&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;As part of our &lt;a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst"&gt;PyQt Tutorial series&lt;/a&gt;, we&amp;#8217;ve got a &lt;a class="reference external" href="https://benhoff.net/pyqt-hello-world.rst"&gt;hello world gui app&lt;/a&gt; running. Now we need to design our application. So let&amp;#8217;s talk about some general desktop &lt;span class="caps"&gt;GUI&lt;/span&gt; design. You might have used a lot of &lt;span class="caps"&gt;GUI&lt;/span&gt; applications, but you probably never noticed their design. Especially (and super ironically) if it was done well. As a fun exercise, if someone asked you to design a web browser right now, what would your interface look&amp;nbsp;like?&lt;/p&gt;
+&lt;p&gt;If you&amp;#8217;re stumped, don&amp;#8217;t worry. A lot of people have thought about this before and have ideas. Three main ones in&amp;nbsp;fact.&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Single Document&amp;nbsp;Interface&lt;/li&gt;
+&lt;li&gt;Tabbed Document&amp;nbsp;Interface&lt;/li&gt;
+&lt;li&gt;Multiple Document&amp;nbsp;Interface&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="section" id="single-document-interfaces"&gt;
+&lt;h2&gt;Single Document&amp;nbsp;Interfaces&lt;/h2&gt;
+&lt;p&gt;In a Single Document Interface, there&amp;#8217;s only a single window for each instance of the application. LibreOffice Writer, Microsoft Word, and most other word processors share this&amp;nbsp;design.&lt;/p&gt;
+&lt;img alt="" src="https://benhoff.net/images/libreoffice-snap.png" /&gt;
+&lt;p&gt;Each document, or application, that&amp;#8217;s opened gets it&amp;#8217;s own window. The window management is done by the native Desktop&amp;nbsp;Environment.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;d recommend a single document interface for most GUIs as long as the functionality is simple. Make sure that when you&amp;#8217;re designing your gui that pulling up multiple instances won&amp;#8217;t lock up resources (ports, databases, files,&amp;nbsp;etc.).&lt;/p&gt;
+&lt;!-- TODO add in some example code of a single document design. --&gt;
+&lt;p&gt;Single document design in PyQt is the default. We&amp;#8217;ve pretty much got it going in our hello world example. The only thing we need to do is add some content to our Gui and organize it. I typically subclass a &lt;tt class="docutils literal"&gt;QWidget&lt;/tt&gt; and use &lt;tt class="docutils literal"&gt;QLayout&lt;/tt&gt; with &lt;tt class="docutils literal"&gt;QWidget.setLayout&lt;/tt&gt; function to group things logically. &lt;tt class="docutils literal"&gt;QLayout&lt;/tt&gt; has some subclasses that can be used to logically arrange things. A favorite is to us &lt;tt class="docutils literal"&gt;QVBoxLayout&lt;/tt&gt; or &lt;tt class="docutils literal"&gt;QHBoxLayout&lt;/tt&gt; since things kind of mostly resize correctly in&amp;nbsp;Qt.&lt;/p&gt;
+&lt;p&gt;As I mentioned before, Single Document Interface programs are easy to program. A couple of cons however include the fact that it may be challenging to jam advanced functionality into them. Depending on the design or back end, if your user pulls up too instances, it can choke the system&amp;nbsp;resources.&lt;/p&gt;
+&lt;p&gt;So what do you do if your interfaces need to be more complicated? Let&amp;#8217;s look at a few&amp;nbsp;alternatives.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="tabbed-document-interfaces"&gt;
+&lt;h2&gt;Tabbed Document&amp;nbsp;Interfaces&lt;/h2&gt;
+&lt;p&gt;Tabbed Document Interfaces are an extension of the Single Document Interface. Earlier when I asked what you might use to build a web browser&amp;#8230; Well if you&amp;#8217;re on desktop, you probably thought of a tabbed interface. It&amp;#8217;s the most&amp;nbsp;common.&lt;/p&gt;
+&lt;img alt="" src="https://benhoff.net/images/chrome-snap.png" /&gt;
+&lt;p&gt;I&amp;#8217;d recommend tabbed document interfaces for anything more complicated than a single&amp;nbsp;page.&lt;/p&gt;
+&lt;p&gt;Qt comes has a custom class to handle creating tabbed interfaces. &lt;tt class="docutils literal"&gt;QTabWidget&lt;/tt&gt; and the &lt;tt class="docutils literal"&gt;QTabWidget.addWidget&lt;/tt&gt; functionality are good spots to start. You can also make your own custom one looking at &lt;tt class="docutils literal"&gt;QTabBar&lt;/tt&gt;. I&amp;#8217;ll typically label the tabs logically and try to jam the most interesting/useful information in the left-most tabs (following the left to right reading&amp;nbsp;pattern).&lt;/p&gt;
+&lt;p&gt;I think the biggest con that I can think of off the top of my head for a Tabbed design is the inability to change to a single document interface to refer to a previous tab. Web browsers got rid of this limitation by allowing you to pull a tab into a new window. While I believe this can be done with Qt, it would take a large amount of coding to&amp;nbsp;accomplish.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="multiple-document-interfaces"&gt;
+&lt;h2&gt;Multiple Document&amp;nbsp;Interfaces&lt;/h2&gt;
+&lt;p&gt;And then multiple document interfaces are just interesting. I haven&amp;#8217;t seen many Multiple Document Interfaces out in the wild. The best example I have off the top of my head of a Multiple Document Interface that I&amp;#8217;ve used is Solidworks, or other mechanical drafting software. Excel also has a Multiple Document&amp;nbsp;Interface.&lt;/p&gt;
+&lt;img alt="" src="https://i-msdn.sec.s-msft.com/dynimg/IC6922.gif" /&gt;
+&lt;p&gt;I&amp;#8217;m not sure when the best time to use Multiple Document Interfaces would be. The challenge is that instead of letting the desktop environment control the window management, your program does instead. This can break the natural flow of the user, although this may be mitigated if you develop specifically for one platform (looking at you,&amp;nbsp;Windows).&lt;/p&gt;
+&lt;p&gt;You can create an &lt;span class="caps"&gt;MDI&lt;/span&gt; in Qt using the &lt;tt class="docutils literal"&gt;QMdiArea&lt;/tt&gt; and then adding windows using &lt;tt class="docutils literal"&gt;QMdiArea.addSubWindow&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;d recommend checking out the &lt;a class="reference external" href="https://en.wikipedia.org/wiki/Multiple_document_interface"&gt;wikipedia&lt;/a&gt; page on the topic. The &lt;a class="reference external" href="https://msdn.microsoft.com/en-us/library/ms997505.aspx?ranMID=24542&amp;amp;ranEAID=TnL5HPStwNw&amp;amp;ranSiteID=TnL5HPStwNw-L9gN68KGHNTwS1y_SVKSfw&amp;amp;tduid=(0b68db1eaba6ffcc15fac5f2d8ab4540)(256380)(2459594)(TnL5HPStwNw-L9gN68KGHNTwS1y_SVKSfw)()"&gt;Micrsoft Developers Network&lt;/a&gt; also has some documentation that might be of further&amp;nbsp;use.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="mixed"&gt;
+&lt;h2&gt;Mixed&lt;/h2&gt;
+&lt;p&gt;As been hinted at several times already, there&amp;#8217;s always the option to mix these main interfaces as much as possible. Keep in mind as well, that there is a lot of support for toolbars and dock widgets (check out the &lt;tt class="docutils literal"&gt;QMainWindow&lt;/tt&gt; documentation). The Integrated Developer Environment (&lt;span class="caps"&gt;IDE&lt;/span&gt;) &lt;tt class="docutils literal"&gt;Spyder&lt;/tt&gt; is a great example of using dock widgets to great&amp;nbsp;effect.&lt;/p&gt;
+&lt;p&gt;As I wrap up, I&amp;#8217;d like to recognize this excellent blog post on &lt;a class="reference external" href="https://richnewman.wordpress.com/category/tabbed-document-interface/"&gt;User Interface Design for Business Applications&lt;/a&gt;. I default to Single Document Interfaces as much as possible until complexity gets me, and then I switch to a tabbed interface. But the aforementioned post helped me ensure I wasn&amp;#8217;t overlooking a design while I was crafting my latest&amp;nbsp;creation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="wrap-up"&gt;
+&lt;h2&gt;Wrap&amp;nbsp;Up&lt;/h2&gt;
+&lt;p&gt;Now that we know a couple of different design patterns, let&amp;#8217;s go ahead and apply them! Which is exactly what we&amp;#8217;ll do in the next section of where we look at &lt;a class="reference external" href="https://benhoff.net/pyqt-layout-design.rst"&gt;layout management in PyQt&lt;/a&gt;. Or, if you&amp;#8217;d like to jump around, &lt;a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst"&gt;go to the top level index&lt;/a&gt; and jump to the section of the tutorial that interests you&amp;nbsp;most.&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="PyQt"></category></entry><entry><title>PyQt Hello World Application</title><link href="https://benhoff.net/pyqt-hello-world-application.html" rel="alternate"></link><published>2017-06-16T13:27:00-05:00</published><updated>2017-06-16T13:27:00-05:00</updated><author><name>Ben Hoff</name></author><id>tag:benhoff.net,2017-06-16:/pyqt-hello-world-application.html</id><summary type="html">&lt;p class="first last"&gt;Creating the hello world app of desktop&amp;nbsp;applications.&lt;/p&gt;
+</summary><content type="html">&lt;div class="section" id="getting-started"&gt;
+&lt;h2&gt;Getting&amp;nbsp;Started&lt;/h2&gt;
+&lt;p&gt;This is the first step in the &lt;a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst"&gt;PyQt Tutorial series&lt;/a&gt;!&amp;nbsp;Welcome!&lt;/p&gt;
+&lt;p&gt;We&amp;#8217;re going to start with a hello world application, as sometimes getting everything installed and working correctly can be an emotionally terrifying experience. Just ask me. I&amp;#8217;ve done software&amp;nbsp;before.&lt;/p&gt;
+&lt;p&gt;So starting from&amp;nbsp;nothing.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="install-python"&gt;
+&lt;h2&gt;Install&amp;nbsp;Python&lt;/h2&gt;
+&lt;p&gt;&lt;a class="reference external" href="http://python-guide-pt-br.readthedocs.io/en/latest/starting/installation/"&gt;Follow these installation instructions&lt;/a&gt;, based on your &lt;span class="caps"&gt;OS&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;If you&amp;#8217;re running a linux distribution, you can likely use your native package&amp;nbsp;manager.&lt;/p&gt;
+&lt;p&gt;Make sure if you&amp;#8217;re running Windows that you add Python to your path library. It should be a pop-up option during the install. If you mess up, &lt;cite&gt;turn to Google&lt;/cite&gt;.&lt;/p&gt;
+&lt;p&gt;Make sure you install Python 3. This tutorial will not be for &lt;a class="reference external" href="https://pythonclock.org/"&gt;Python 2&lt;/a&gt; as Python 2 is reaching it&amp;#8217;s end of life for official&amp;nbsp;support.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-a-working-directory"&gt;
+&lt;h2&gt;Create A Working&amp;nbsp;Directory&lt;/h2&gt;
+&lt;p&gt;Create a directory you want to work out&amp;nbsp;of.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; mkdir pyqt
+&lt;span class="gp"&gt;$&lt;/span&gt; &lt;span class="nb"&gt;cd&lt;/span&gt; pyqt
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-virtual-environment"&gt;
+&lt;h2&gt;Create Virtual&amp;nbsp;Environment&lt;/h2&gt;
+&lt;p&gt;We&amp;#8217;re going to create and activate a virtual environment, so that your global site-packages stay clean. Hard to keep track of which project, installed which dependencies,&amp;nbsp;otherwise.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; python -m venv &amp;lt;DIR&amp;gt;
+&lt;span class="gp"&gt;$&lt;/span&gt; &lt;span class="nb"&gt;source&lt;/span&gt; &amp;lt;DIR&amp;gt;/bin/activate
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="install-pyqt5"&gt;
+&lt;h2&gt;Install&amp;nbsp;PyQt5&lt;/h2&gt;
+&lt;p&gt;Right, now that our virtual environment is activated, let&amp;#8217;s install&amp;nbsp;PyQt.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$&lt;/span&gt; pip install PyQt5
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="build-the-framework"&gt;
+&lt;h2&gt;Build the&amp;nbsp;Framework&lt;/h2&gt;
+&lt;p&gt;Now, fire up your favorite text editor, it&amp;#8217;s time to start programming. Create a file named &lt;cite&gt;__main__.py&lt;/cite&gt; and add the following to&amp;nbsp;it.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# file name: __main__.py&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="k"&gt;pass&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="write-pyqt-specific-code"&gt;
+&lt;h2&gt;Write PyQt Specific&amp;nbsp;Code&lt;/h2&gt;
+&lt;p&gt;Now, in our main function, we&amp;#8217;re going to create an instances of &lt;a class="reference external" href="http://doc.qt.io/qt-5/qapplication.html"&gt;QApplication&lt;/a&gt; and &lt;a class="reference external" href="http://doc.qt.io/qt-5/qmainwindow.html"&gt;QMainWindow&lt;/a&gt;. I&amp;#8217;d recommend reading the &lt;a class="reference external" href="http://doc.qt.io/qt-5/qapplication.html#details"&gt;documentation&lt;/a&gt; on &lt;tt class="docutils literal"&gt;QApplication&lt;/tt&gt;, especially the section with the &lt;em&gt;main areas of responsibility&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;If you don&amp;#8217;t get there, the &lt;span class="caps"&gt;TLDR&lt;/span&gt; on &lt;tt class="docutils literal"&gt;QApplication&lt;/tt&gt; responsibilities:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;event&amp;nbsp;handling&lt;/li&gt;
+&lt;li&gt;main&amp;nbsp;settings&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;tt class="docutils literal"&gt;QMainWindow&lt;/tt&gt; is a magical class. It gives a lot of normal desktop interface aspects that you&amp;#8217;ve come to expect, such as a menu bar, tool bars, and status bars&amp;#8230; &lt;em&gt;for free&lt;/em&gt;. Again, the &lt;a class="reference external" href="http://doc.qt.io/qt-5/qmainwindow.html#details"&gt;documentation is awesome&lt;/a&gt;, but check out the below figure to get a hint for the types of functionality that are integrated into the &lt;tt class="docutils literal"&gt;QMainWindow&lt;/tt&gt; class.&lt;/p&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="" src="http://doc.qt.io/qt-5/images/mainwindowlayout.png" /&gt;
+&lt;p class="caption"&gt;Notice that the Menu Bar and Status Bar are tied to QMainWindow. We&amp;#8217;ll come back to&amp;nbsp;that.&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;So now that we now a little bit about what we&amp;#8217;re doing, let&amp;#8217;s write the rest of the code. The entire source script is available &lt;a class="reference external" href="https://github.com/benhoff/blog/blob/master/scripts/pyqt-hello-world.py"&gt;at this link&lt;/a&gt; as&amp;nbsp;well.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# file name: __main__.py&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;PyQt5&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;QtCore&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="c1"&gt;# We need to make the QApplication before our QMainWindow&lt;/span&gt;
+    &lt;span class="c1"&gt;# We also need to pass in our system argument values (sys.argv)&lt;/span&gt;
+    &lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QApplication&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;main_window&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QMainWindow&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="c1"&gt;# QMainWindow requires a central widget, so we&amp;#39;ll just pass in a&lt;/span&gt;
+    &lt;span class="c1"&gt;# blank widget for now&lt;/span&gt;
+    &lt;span class="n"&gt;blank_widget&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;QtWidgets&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;QWidget&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;main_window&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setCentralWidget&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;blank_widget&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="c1"&gt;# Show our main window&lt;/span&gt;
+    &lt;span class="n"&gt;main_window&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="c1"&gt;# Start the event loop processing&lt;/span&gt;
+    &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="k"&gt;exec&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;!-- TODO Get photo evidence --&gt;
+&lt;p&gt;That&amp;#8217;s it! You should see a small window open up. We&amp;#8217;ve got the &amp;#8220;Hello World&amp;#8221; version for &lt;span class="caps"&gt;GUI&lt;/span&gt;&amp;nbsp;programming.&lt;/p&gt;
+&lt;p&gt;The next step is to talk about &lt;a class="reference external" href="https://benhoff.net/qt-interface-design.rst"&gt;choices for our central widget design&lt;/a&gt;, but if you&amp;#8217;re an advanced PyQt programmer already, you can checkout &lt;a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst"&gt;this high level overview&lt;/a&gt; of the tutorial series to jump around to the topic you&amp;nbsp;need.&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="PyQt"></category></entry></feed>

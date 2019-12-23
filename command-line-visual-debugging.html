@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>Visual Debugging from the Command Line</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/command-line-visual-debugging.html">
+    <meta name="twitter:title" content="Ben's Blog ~ Visual Debugging from the Command Line">
+    <meta name="twitter:description" content="How to visually debug something from the command line">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ Visual Debugging from the Command Line"/>
+    <meta property="og:description" content="How to visually debug something from the command line"/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li class="active"><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/command-line-visual-debugging.html" rel="bookmark"
+                                                  title="Permalink to Visual Debugging from the Command Line">Visual Debugging from the Command&nbsp;Line</a></h2>
+            <div class="entry-content blog-post">
+                <p>Working with images is interesting. In a previous piece of work, a customer wanted to bring in some semantic segmentation. Semantic Segmentation goes pixel by pixel and assigns probabilities that the pixel belongs to label. You&#8217;ll typically see this in street images, with individual cars, people, bikes, etc being segmented out of the overall picture on a pixel&nbsp;level.</p>
+<p>The interesting problem of working with semantic segmentation technologies is working with the outputs. Typically the output of a semantic segmentation model is a list of pixel probabilities. Because it&#8217;s a pixel-by-pixel technology, you end up with probabilities for every single pixel in an image. Combine that with an estimation for each type of class that a pixel can be, and every pixel in an 800 x 600 image suddenly has 50 probabilities associated with&nbsp;it.</p>
+<p>(There&#8217;s some tech where they use the bounding box to limit the number of pixels passed back (Mask <span class="caps">RCNN</span>), but it&#8217;s still a lot of data to work&nbsp;with.)</p>
+<p>I&#8217;m not sure I&#8217;ve ever figured out a good way to work with multi-layered array data like that contained within pictures. Leave a comment below if you have any&nbsp;hints.</p>
+<p>Since I was working with images though, the nice thing is that you can just, you know, <em>display</em> the images. After much trail and error, that was the best way I could figure out how to actually iteratively develop semantic segmentation&nbsp;code. </p>
+<p>Interestingly, I&#8217;ve never much cared for how OpenCv handles windows until&nbsp;know.</p>
+<div class="highlight"><pre><span></span><span class="c1"># Note that `some_numpy_array` is just that, a numpy array</span>
+
+<span class="c1"># Visualize the array or image</span>
+<span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s1">&#39;My Array&#39;</span><span class="p">,</span> <span class="n">some_numpy_array</span><span class="p">)</span>
+<span class="c1"># wait until user presses keys</span>
+<span class="c1"># Note that without this waitkeys, the window will be created and destroyed before you can notice it</span>
+<span class="n">cv2</span><span class="o">.</span><span class="n">waitKeys</span><span class="p">()</span>
+
+<span class="c1"># Do some kind of manipulation here or you could show another picture to compare</span>
+<span class="n">some_numpy_array</span> <span class="o">=</span> <span class="n">do_some_action</span><span class="p">(</span><span class="n">some_numpy_array</span><span class="p">)</span>
+
+<span class="c1"># Visualize the array or image again after the changes</span>
+<span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s1">&#39;My Array&#39;</span><span class="p">,</span> <span class="n">some_numpy_array</span><span class="p">)</span>
+<span class="n">cv2</span><span class="o">.</span><span class="n">waitKeys</span><span class="p">()</span>
+</pre></div>
+
+
+<p>The method cv2.destroyAllWindows() or cv2.destroyWindow(&#8216;your-name-here&#8217;) might be useful depending on the specifics of what you have to visualize. I just reused the existing context/window, but there might be cases where you&#8217;d want to display multiple windows side-by-side or some other&nbsp;setup.</p>
+<p>This was a funny setup because I was actually building some server code. So as I was debugging, my web server started spitting some Desktop Graphical User Interfaces. While none of this code made it into production, it definitely helped me track down the logic errors in my code and get the result <a href="https://github.com/opencv/cvat/commit/a435b410ede92130ca2bc67a7ae2a60962f6ebef">submitted up and working correctly</a>.</p>
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/other.html" rel="bookmark"
+                                               title="Permalink to Other">[ Other ]</a></span>
+                <span class="post_date">Sun 24 November 2019</span>
+                <div><span>Tags : </span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/command-line-visual-debugging.html&text=Visual Debugging from the Command Line&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/command-line-visual-debugging.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/command-line-visual-debugging.html&t=Visual Debugging from the Command Line"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/command-line-visual-debugging.html&title=Visual Debugging from the Command Line"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=Visual Debugging from the Command Line&amp;body=Viens découvrir un article à propos de [Visual Debugging from the Command Line] sur le site de Ben Hoff. https://benhoff.net/command-line-visual-debugging.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/command-line-visual-debugging.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>

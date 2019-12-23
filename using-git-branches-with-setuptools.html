@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>Using Git Branches With Setuptools</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/using-git-branches-with-setuptools.html">
+    <meta name="twitter:title" content="Ben's Blog ~ Using Git Branches With Setuptools">
+    <meta name="twitter:description" content="Want to specify a git dependency in a setup.py? Here’s how.">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ Using Git Branches With Setuptools"/>
+    <meta property="og:description" content="Want to specify a git dependency in a setup.py? Here’s how."/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li class="active"><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/using-git-branches-with-setuptools.html" rel="bookmark"
+                                                  title="Permalink to Using Git Branches With Setuptools">Using Git Branches With&nbsp;Setuptools</a></h2>
+            <div class="entry-content blog-post">
+                <p>I wanted to add a git branch in a dependency for a project of mine in the <cite>setup.py</cite> file. Should be easy&nbsp;right?</p>
+<p>Several hours of research later and pinging a project maintainer to bump the version in his branch&nbsp;later&#8230;</p>
+<p>And it&#8217;s actual not too bad once you know how to do it. So let&#8217;s figure out how to do&nbsp;it.</p>
+<p>In the <cite>setup</cite> method of <cite>setup.py</cite> you need to have two&nbsp;arguments.</p>
+<ul class="simple">
+<li>install_requires</li>
+<li>dependency_links</li>
+</ul>
+<p>In this case, I was trying to add the <a class="reference external" href="https://github.com/jonathanslenders/python-prompt-toolkit">python-prompt-toolkit</a> 2.0.0 branch to my project (Version 1.0.15 is currently in&nbsp;pypi).</p>
+<p>Let&#8217;s pick the easy one first, the&nbsp;install_requires.</p>
+<div class="highlight"><pre><span></span><span class="n">install_requires</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;prompt-toolkit&gt;=2.0.0&#39;</span><span class="p">]</span>
+</pre></div>
+<p>This requirement parsing will currently fail due to the fact there isn&#8217;t a prompt-toolkit version greater than or equal to 2.0.0 in pypi. So let&#8217;s fix that by specifying the 2.0.0 branch with in the dependency&nbsp;links.</p>
+<div class="highlight"><pre><span></span><span class="n">dependency_links</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;git+https://github.com/jonathanslenders/python-prompt-toolkit@2.0#egg=prompt-toolkit-2.0.0&#39;</span><span class="p">]</span>
+</pre></div>
+<p>There&#8217;s a couple of special things about the way this link is written that are poorly documented, and thus worth writing&nbsp;about.</p>
+<ol class="arabic simple">
+<li><cite>git+https://github.com/jonathanslenders/python-prompt-toolkit</cite> -&gt; Standard documented way to install git links using pip. Nothing to see here, just an <span class="caps">FYI</span>.</li>
+<li>The <cite>&#64;2.0</cite> specifies the branch that we want to use. Note that this happens to be a number in this case, but can be whatever branch you need. I.e., <cite>dev</cite> would be a common interesting branch name that could be used by specifying <cite>&#64;dev</cite>.</li>
+<li>The <cite>#egg=prompt-toolkit-2.0.0</cite> is the most important bit and worth expounding on a little&nbsp;more.</li>
+</ol>
+<p>We need to specify which package this dependency link provides. We do this with the <cite>#egg=PACKAGE_NAME</cite> syntax. In this case, this dependency link provides the package <cite>prompt-toolkit</cite>, ie <cite>#egg=prompt-toolkit</cite></p>
+<p>But the most important part of this portion of a dependency link, and one that isn&#8217;t documented at all, is that you <em>must</em> provide a version number. I&#8217;ve done this here with the <cite>-2.0.0</cite>. The version number you provide can be any version, but it must be&nbsp;there.</p>
+<p>So for example, if you wanted to specify a dependency on the development version of Vexbot, the dependency link could look like&nbsp;this:</p>
+<div class="highlight"><pre><span></span><span class="n">dependency_links</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;git+https://github.com/benhoff/vexbot@dev#egg=vexbot-0&#39;</span><span class="p">]</span>
+</pre></div>
+<p>Note the <cite>-0</cite> specifying the version number at the end of the vexbot dependency&nbsp;link.</p>
+<p>You can throw in whatever version number you&#8217;d like so that you can help properly guide your user as to what version you really need (like I did with the <cite>install_requires</cite> constraint on&nbsp;prompt-toolkit).</p>
+<p>Please note that dependency links are useful! You can use them&nbsp;to:</p>
+<ul class="simple">
+<li>Specify a private git repository as a dependency in&nbsp;setup.py</li>
+<li>Specify a patch version of a repository over the package in&nbsp;pypi</li>
+<li>Specify a package that isn&#8217;t published to pypi but is on&nbsp;Github</li>
+</ul>
+<p>Hope that&nbsp;helps!</p>
+
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/random.html" rel="bookmark"
+                                               title="Permalink to Random">[ Random ]</a></span>
+                <span class="post_date">Thu 28 December 2017</span>
+                <div><span>Tags : </span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/using-git-branches-with-setuptools.html&text=Using Git Branches With Setuptools&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/using-git-branches-with-setuptools.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/using-git-branches-with-setuptools.html&t=Using Git Branches With Setuptools"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/using-git-branches-with-setuptools.html&title=Using Git Branches With Setuptools"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=Using Git Branches With Setuptools&amp;body=Viens découvrir un article à propos de [Using Git Branches With Setuptools] sur le site de Ben Hoff. https://benhoff.net/using-git-branches-with-setuptools.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/using-git-branches-with-setuptools.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>

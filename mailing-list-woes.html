@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>Mailing List Woes</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/mailing-list-woes.html">
+    <meta name="twitter:title" content="Ben's Blog ~ Mailing List Woes">
+    <meta name="twitter:description" content="Figuring out how to add a mailing list.">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ Mailing List Woes"/>
+    <meta property="og:description" content="Figuring out how to add a mailing list."/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li class="active"><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/mailing-list-woes.html" rel="bookmark"
+                                                  title="Permalink to Mailing List Woes">Mailing List&nbsp;Woes</a></h2>
+            <div class="entry-content blog-post">
+                <p>All right, let&#8217;s add a mailing&nbsp;list.</p>
+<p>So I know I&#8217;ve got <a class="reference external" href="https://www.mailgun.com">Mailgun</a> use for <a class="reference external" href="http://benhoff.net/adding-discourse-comments.html">Discourse</a> (used for forum comments). Looking into the Mailgun documentation, I can see that there&#8217;s an actual <a class="reference external" href="https://documentation.mailgun.com/en/latest/api-mailinglists.html"><span class="caps">API</span></a> for a mailing list. However the documentation shows Mailgun&#8217;s implementation is more of a backend deal. Which would be fine if I had a dynamic application, but since I&#8217;m dealing with static pages, this is a major&nbsp;hangup.</p>
+<p>So my next option is to search for a look for either an already existing solution or host my&nbsp;own.</p>
+<p>This is a mailing list. I could build one with sqlite and python in like 5 minutes. And it would be&nbsp;awful.</p>
+<p>Let&#8217;s start by looking to see what I can host&nbsp;myself.</p>
+<p>After some google searching, it looks like the only open source version is <a class="reference external" href="https://www.gnu.org/software/mailman/">Mailman</a>.</p>
+<p>I&#8217;ve got a confession to make. I&#8217;ve tried to get Mailman up and running before. It didn&#8217;t go very well. Mailman is a mailing list manager. It provides a way to see past emails, navigate replies, and search. Mailman does not provide a way to actually send emails. You have to hook either Postfix or something else up to actually get it up and&nbsp;running.</p>
+<p>Also the other thing is, I&#8217;ve already got a full up forum with Discord. And right now, that forum is consuming 1 of 1 gigabytes of data that the Digital Ocean instance provides me. And I don&#8217;t want to upsize the&nbsp;instance.</p>
+<p>So now I&#8217;m back to using a hosted service. A couple of blogs recommended using <a class="reference external" href="https://www.aweber.com/">Aweber</a>, who I&#8217;ve never heard of, but I&#8217;m going to stick with <a class="reference external" href="https://mailchimp.com/">Mailchimp</a>, mostly because I&#8217;ve heard of them&nbsp;actually.</p>
+<p>So signed up, started building a mailing list, got the html code to put into the site&#8217;s template. Which is perfect. I&#8217;ll eventually work towards sending out weekly &#8220;round-up&#8221; emails. Just a simple email that lays out all the articles so you don&#8217;t have to visit the site to see what I&#8217;m writing&nbsp;about.</p>
+<p>But there&#8217;s some pieces I need to figure out. Since I&#8217;ve got my own domain and a transactional mailing agent with Mailgun, I should be able to actually receive emails at the domain. As in: <a class="reference external" href="mailto:ben&#64;benhoff.net">ben&#64;benhoff.net</a></p>
+<p>I set up a few referral rules at Mailgun, but it&#8217;s a little dicey currently. I&#8217;ve gotten a few emails, but not all of them. I&#8217;m not sure what&#8217;s wrong, but I think it has something to do with the <span class="caps">DNS</span>&nbsp;records.</p>
+<p>If you have ever experienced or might now what&#8217;s going on, feel free to comment below and point me in some resources. Otherwise, I&#8217;ll dive into it later and post another article detailing the&nbsp;fix.</p>
+
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/blog.html" rel="bookmark"
+                                               title="Permalink to Blog">[ Blog ]</a></span>
+                <span class="post_date">Mon 12 June 2017</span>
+                <div><span>Tags : </span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/mailing-list-woes.html&text=Mailing List Woes&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/mailing-list-woes.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/mailing-list-woes.html&t=Mailing List Woes"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/mailing-list-woes.html&title=Mailing List Woes"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=Mailing List Woes&amp;body=Viens découvrir un article à propos de [Mailing List Woes] sur le site de Ben Hoff. https://benhoff.net/mailing-list-woes.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/mailing-list-woes.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>

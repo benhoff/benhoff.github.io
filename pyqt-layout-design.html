@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>PyQt Layout Design</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/pyqt-layout-design.html">
+    <meta name="twitter:title" content="Ben's Blog ~ PyQt Layout Design">
+    <meta name="twitter:description" content="Let’s work on creating a single interface design face recognition application.">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ PyQt Layout Design"/>
+    <meta property="og:description" content="Let’s work on creating a single interface design face recognition application."/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li class="active"><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/pyqt-layout-design.html" rel="bookmark"
+                                                  title="Permalink to PyQt Layout Design">PyQt Layout&nbsp;Design</a></h2>
+            <div class="entry-content blog-post">
+                <p>As part of our <a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst">PyQt Tutorial series</a> we&#8217;ve built a <a class="reference external" href="https://benhoff.net/pyqt-hello-world.rst">Hello World</a> <span class="caps">GUI</span> application and gone through some basic <a class="reference external" href="https://benhoff.net/qt-interface-design.rst">Interface Design</a> options. In this section, we&#8217;re going to implement the first type of Interface, a Single Document Interface. We&#8217;re going to create a Face Recognition Application, but since I&#8217;d like to focus on the PyQt <span class="caps">GUI</span> development process, the actual face recognition part will be separate from this set of&nbsp;tutorials.</p>
+<p>If you&#8217;re just jumping in here, check out <a class="reference external" href="https://github.com/benhoff/blog/blob/master/scripts/pyqt-hello-world.py">this link</a> to see the code that we&#8217;re starting&nbsp;with.</p>
+<p>So let&#8217;s install a face recognition ready&nbsp;widget.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> pip install facerecog
+</pre></div>
+<p>And then we&#8217;ll import it into our&nbsp;program.</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">facerecog</span> <span class="kn">import</span> <span class="n">MainWidget</span><span class="p">,</span> <span class="n">get_haarcascade_filepath</span>
+</pre></div>
+<p>If you&#8217;re interested in seeing the coding going on behind the face recognition piece, feel free to explore it in <a class="reference external" href="https://benhoff.net/face-detection-in-pyqt.rst">this blog post</a>. Otherwise, let&#8217;s instantiate our face recognition widget and put it in our&nbsp;program.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">facerecog</span> <span class="kn">import</span> <span class="n">MainWidget</span><span class="p">,</span> <span class="n">get_haarcascade_filepath</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># We need to make the QApplication before our QMainWindow</span>
+    <span class="c1"># We also need to pass in our system argument values (sys.argv)</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">main_window</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+
+    <span class="c1"># Here&#39;s that instantiation bit again.</span>
+    <span class="n">haar_filepath</span> <span class="o">=</span> <span class="n">get_haarcascade_filepath</span><span class="p">()</span>
+    <span class="n">main_widget</span> <span class="o">=</span> <span class="n">MainWidget</span><span class="p">(</span><span class="n">haar_filepath</span><span class="p">)</span>
+
+    <span class="c1"># QMainWindow requires a central widget. We&#39;ll pass in our MainWidget here</span>
+    <span class="n">main_window</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">main_widget</span><span class="p">)</span>
+    <span class="c1"># Show our main window</span>
+    <span class="n">main_window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="c1"># Start the event loop processing</span>
+    <span class="n">app</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+<img alt="" class="align-center" src="https://benhoff.net/images/face-recognition-success.png" />
+<p>Obviously this code isn&#8217;t the whole story to the <span class="caps">GUI</span> development. But it demonstrates an important fact about Qt desktop <span class="caps">GUI</span> framework. Everything that the end user interfaces with is a widget. So in this case, since we already have a ready made widget, we can plug it in and send our user on their merry&nbsp;way.</p>
+<p>The end goal for most of our interface design then using the Qt framework will be to wrap our interface into widgets. So how do we do&nbsp;that?</p>
+<p>Well, as we talked about in the Hello World blog post, we can add in some functionality of a menu bar, status bar, dock widgets,&nbsp;etc.</p>
+<img alt="" class="align-center" src="http://doc.qt.io/qt-5/images/mainwindowlayout.png" />
+<p>But most of the time what we want to do is group, or layout, multiple widgets in an area. The way to do that in Qt is through Layout&nbsp;Management.</p>
+<p>All QWidget classes use layouts to manage the life cycle of their subwidgets. In addition to managing the life cycle, ayouts&nbsp;also:</p>
+<ul class="simple">
+<li>Positioning of child&nbsp;widgets.</li>
+<li>Sensible default sizes for&nbsp;windows.</li>
+<li>Sensible minimum sizes for&nbsp;windows.</li>
+<li>Resize&nbsp;handling.</li>
+<li>Automatic updates when contents change:<ul>
+<li>Font size, text or other contents of child&nbsp;widgets.</li>
+<li>Hiding or showing a child&nbsp;widget.</li>
+<li>Removal of child&nbsp;widgets.</li>
+</ul>
+</li>
+</ul>
+<p>Now to be clear, the Qt Documentation does an better job then I will of explaining the in&#8217;s and out&#8217;s of layout management, so I&#8217;d recommend you <a class="reference external" href="http://doc.qt.io/qt-5/layout.html">check it out</a>. But we&#8217;ll go through the basics here of instantiating, using and setting layouts&nbsp;here.</p>
+<p>First we need a master widget that we can set the layout&nbsp;on.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">QtWidgets</span>
+
+<span class="k">class</span> <span class="nc">MasterWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+</pre></div>
+<p>Then we need to pick which layout that we want to&nbsp;use.</p>
+<p>Some of my favorite layouts include <tt class="docutils literal">QHBoxLayout</tt> which arranges widgets horizontally, <tt class="docutils literal">QVBoxLayout</tt>, which arranges widgets vertically, and <tt class="docutils literal">QGridLayout</tt> which allows you to put things in a&nbsp;grid.</p>
+<p>Let&#8217;s use a layout to stack a couple of widgets on top of each other. We&#8217;ll do this using the <tt class="docutils literal">addWidget</tt> function on our instantiated layout. Once we&#8217;ve added all of the widgets that we want, we&#8217;ll then set the layout using the <tt class="docutils literal">setLayout</tt> method on our <tt class="docutils literal">MasterWidget</tt> class.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">QtWidgets</span>
+
+<span class="k">class</span> <span class="nc">MasterWidget</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="c1"># Create a label, push button and line edit widgets</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s1">&#39;This is a label&#39;</span><span class="p">)</span>
+        <span class="n">run_push_button</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Click Me&#39;</span><span class="p">)</span>
+        <span class="n">line_edit</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="s1">&#39;Default line edit text&#39;</span><span class="p">)</span>
+
+        <span class="c1"># create our layout, a vertical layout</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="c1"># add widgets</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">line_edit</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">run_push_button</span><span class="p">)</span>
+
+        <span class="c1"># set the layout of our master widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+<p>This is the resulting gui for the above code, showing all of the widgets stacked&nbsp;vertically.</p>
+<img alt="" class="align-center" src="https://benhoff.net/images/pyqt-layout-example.png" />
+<p>We could also use a grid layout. The <span class="caps">API</span> for that is a little different. Whenever we add a widget, we need to pass in the row and the column. I&#8217;m going to do this using key word arguments so that you can see what is going on. If we remove the <tt class="docutils literal">row</tt> and <tt class="docutils literal">column</tt> key word arguments, this would still be valid code, as these are the positional arguments as&nbsp;well.</p>
+<div class="highlight"><pre><span></span><span class="n">layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+<span class="c1"># add as row 0, column 0</span>
+<span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="c1"># add as row 1, column 0</span>
+<span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">line_edit</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="c1"># add as row 1, column 1</span>
+<span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">run_push_button</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+<p>Below, you can see the change in the appearance of our <span class="caps">GUI</span> with the above layout&nbsp;changes.</p>
+<img alt="" class="align-center" src="https://benhoff.net/images/pyqt-layout-example-2.png" />
+<p>Layouts are a powerful way to add more widgets and control how those new widgets look in our <span class="caps">GUI</span>, so don&#8217;t be afraid to use&nbsp;them!</p>
+<div class="section" id="wrapup">
+<h2>Wrapup</h2>
+<p>You can catch the source code for the tutorial up to this point <a class="reference external" href="https://github.com/benhoff/blog/blob/master/scripts/pyqt-layout-design.py">here</a>.</p>
+<p>There&#8217;s only one problem with our <span class="caps">GUI</span> currently. If we click that push button, nothing happens. What&#8217;s up with that? Well we need to connect our signals and slots together. Check out how to do that, in the <a class="reference external" href="https://benhoff.net/pyqt-signals-slots.rst">Signals and Slots</a> post. Or, if you&#8217;re already familiar with how signals and slots work, feel free to skip ahead using <a class="reference external" href="https://benhoff.net/pyqt-tutorial.rst">this index</a> of the entire&nbsp;tutorial.</p>
+</div>
+
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/pyqt.html" rel="bookmark"
+                                               title="Permalink to PyQt">[ PyQt ]</a></span>
+                <span class="post_date">Mon 17 July 2017</span>
+                <div><span>Tags : </span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/pyqt-layout-design.html&text=PyQt Layout Design&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/pyqt-layout-design.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/pyqt-layout-design.html&t=PyQt Layout Design"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/pyqt-layout-design.html&title=PyQt Layout Design"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=PyQt Layout Design&amp;body=Viens découvrir un article à propos de [PyQt Layout Design] sur le site de Ben Hoff. https://benhoff.net/pyqt-layout-design.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/pyqt-layout-design.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>

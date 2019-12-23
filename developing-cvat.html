@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>Developing OpenCV’s CVAT</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/developing-cvat.html">
+    <meta name="twitter:title" content="Ben's Blog ~ Developing OpenCV’s CVAT">
+    <meta name="twitter:description" content="Summarizing my work up to date with CVAT">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ Developing OpenCV’s CVAT"/>
+    <meta property="og:description" content="Summarizing my work up to date with CVAT"/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li class="active"><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/developing-cvat.html" rel="bookmark"
+                                                  title="Permalink to Developing OpenCV’s CVAT">Developing OpenCV&#8217;s <span class="caps">CVAT</span></a></h2>
+            <div class="entry-content blog-post">
+                <p>As part of a work project, I needed to showcase off some computer vision (specifically, semantic segmentation) capabilities. The client needed to be able to understand both what was technically possibly, but also feel comfortable that it was mature enough to be put into production. I&#8217;ve found that finding open source projects that are being driven by big name players typically gives the required comfort to customers that the tech is mature. Additionally, having a sweet looking and usable user interface that you can drop in to the project day 1 is also very&nbsp;helpful.</p>
+<p>Enter <span class="caps">CVAT</span>. Intel has recently been trying to flex it&#8217;s muscle in the deep learning space, making up for the early lead that <span class="caps">NVIDIA</span> has taken with <span class="caps">CUDA</span>. Intel&#8217;s approach has been an open source one, leading with a suite of deep learning technologies. I&#8217;m a little ignorant on the total depth of all the total tools, but I am now very familiar with <span class="caps">CVAT</span> and OpenVINO tool&nbsp;suites.</p>
+<p><span class="caps">CVAT</span> is an image annotation platform to be used for training machine learning models. While most image annotation labor is cheap (literally drawing boxes on a static image), there&#8217;s always a desire to leverage existing work to increase the accuracy, speed, and reduce costs in annotation&nbsp;labor.</p>
+<p>To do this, <span class="caps">CVAT</span> integrates open source pretrained models to act as &#8220;first-pass&#8221; annotators using the OpenVINO&nbsp;toolkit.</p>
+<p>OpenVINO is an abstracting layer between multiple toolkits, allowing one to use both PyTorch, <span class="caps">ONNX</span>, and Tensorflow models in a uniform way. (There&#8217;s also some optimizations it uses to abstract between <span class="caps">CPU</span> and <span class="caps">GPU</span> power, but that&#8217;s less important for this use&nbsp;case).</p>
+<p><span class="caps">CVAT</span> was perfect for my needs. Someone else had already built the user interface, I just needed to customize a bit of the OpenVINO code base to showcase what was possible for my client. Well, that was the&nbsp;theory.</p>
+<p>In reality, the integration between the web server and the deep learning hadn&#8217;t had much main stream development support. So while what I wanted to do was theoretically easy, it actually took significant development support to make it&nbsp;possible.</p>
+<p>In addition to a few bugs that had to be fixed, the biggest technical contributions I had to do, were quite  odd. Users were required to submit Python scripts to process the results of each model back into a format that <span class="caps">CVAT</span> understood. The architects of the code that I was using had set up a limited python sandbox to process this user submitted code. When I first started, there was no way for a user to get the full power of the python language , even if you were an admin. This was obviously not going to work for me. So the first thing I did was fix that. <a href="https://github.com/opencv/cvat/commit/f20698921e5355a4b13c4f90612163f56b9835d0">I added a flag to check if a user was a admin or not and gave them the capability to run all of python if they were an admin</a>. That fixed the majority of my issues, but I still didn&#8217;t have the full power of Python behind me. Because Python&#8217;s eval does not actually process import&nbsp;statements.</p>
+<p>So the second thing I had to do was add in the capability to import code in these user-submitted scripts. In order to do that, I would have to programmatically assess and import the required packages before running the &#8220;eval&#8221;&nbsp;statement.</p>
+<p>I originally thought that setting up this process was going to be too difficult. However, I did remember that Python has actually exposed a significant amount of it&#8217;s code processing in the standard library, and that gave me hope. With the help of a <a href="https://stackoverflow.com/questions/9008451/python-easy-way-to-read-all-import-statements-from-py-module">StackOverflow question</a>, I found out that I could indeed quickly parse out the import statements using Python&#8217;s &#8220;ast&#8221; library. The only thing left to do was to <a href="https://github.com/opencv/cvat/commit/418cdbe1464a06d5d7b26e6385586a2e5cfa12a5">parse the import statements and dynamically import the code, before evaluating the code</a>.</p>
+<p>The most technically impressive peace of this actually ended up being the easiest due to the above linked StackOverflow question (minus the research to get there). Tracing through the code base to manually ensure admin checks were put in place (my first patch) took significantly to ensure everything was in correctly. Grokking code completely and dealing with permissions is difficult, and will always probably&nbsp;be.</p>
+<p>However, with the capability to showcase off semantic segmentation in a fully featured web interface, my customer was convinced of the readiness of the technology. Sadly, I left the company before I was able to get the contract in place. I did have a lot of fun building out the&nbsp;tech!</p>
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/cvat.html" rel="bookmark"
+                                               title="Permalink to CVAT">[ CVAT ]</a></span>
+                <span class="post_date">Sun 24 November 2019</span>
+                <div><span>Tags : </span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/developing-cvat.html&text=Developing OpenCV’s CVAT&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/developing-cvat.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/developing-cvat.html&t=Developing OpenCV’s CVAT"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/developing-cvat.html&title=Developing OpenCV’s CVAT"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=Developing OpenCV’s CVAT&amp;body=Viens découvrir un article à propos de [Developing OpenCV’s CVAT] sur le site de Ben Hoff. https://benhoff.net/developing-cvat.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/developing-cvat.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Person">
+<head>
+            <meta charset="utf-8">
+        <!-- Site Meta Data -->
+        <title>Flashing Beaglebone Black</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Ben Hoff">
+
+        <link rel="shortcut icon" href="">
+
+        <!-- schema.org -->
+        <meta itemprop="name" content="Ben's Blog">
+        <meta itemprop="image" content="">
+        <meta itemprop="description" content="">
+
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <!-- Style Meta Data -->
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="https://benhoff.net/theme/css/pygments.css" type="text/css"/>
+
+        <!-- Feed Meta Data -->
+            <link href="https://benhoff.net/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+                  title="Ben's Blog ATOM Feed"/>
+
+        <!-- Twitter Feed -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="">
+        <meta name="twitter:image" content="">
+
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:url" content="https://benhoff.net/flashing-beaglebone-black.html">
+    <meta name="twitter:title" content="Ben's Blog ~ Flashing Beaglebone Black">
+    <meta name="twitter:description" content="Trails and tribulations of trying to bring a Beaglebone black up to the latest kernel.">
+
+    <!-- Facebook Meta Data -->
+    <meta property="og:title" content="Ben's Blog ~ Flashing Beaglebone Black"/>
+    <meta property="og:description" content="Trails and tribulations of trying to bring a Beaglebone black up to the latest kernel."/>
+    <meta property="og:image" content=""/>
+</head>
+
+
+<body>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- blog ads -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8163811198846044"
+     data-ad-slot="8727843665"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<!-- Sidebar -->
+<aside>
+    <!--<center><a href="https://benhoff.net"><img id="avatar" src=""></a></center>-->
+    <h1>Ben's Blog</h1>
+    <br>
+
+
+    <nav class="nav">
+        <ul class="list-bare">
+
+                <li><a class="nav__link" href="http://benhoff.net/archives.html">Archives</a></li>
+                <li><a class="nav__link" href="https://community.benhoff.net">Community</a></li>
+
+                <li><a class="nav__link" href="https://benhoff.net/pages/about-me.html">About&nbsp;Me</a></li>
+
+        </ul>
+    </nav>
+
+    <p class="social">
+            <a href="https://benhoff.net/feeds/all.atom.xml" rel="alternate">
+                <img src="https://benhoff.net/theme/images/icons/rss.png"></a>
+    </p>
+
+        <h2>Categories</h2>
+        <ul class="navbar">
+                <li><a
+                        href="https://benhoff.net/category/blog.html">Blog</a></li>
+                <li><a
+                        href="https://benhoff.net/category/cvat.html">CVAT</a></li>
+                <li><a
+                        href="https://benhoff.net/category/other.html">Other</a></li>
+                <li><a
+                        href="https://benhoff.net/category/pyqt.html">PyQt</a></li>
+                <li class="active"><a
+                        href="https://benhoff.net/category/random.html">Random</a></li>
+        </ul>
+
+        <h2 class="blog_roll_link"><br/>BLOGROLLS</h2>
+        <ul class="navbar">
+                <li><a href="https://community.benhoff.net">Community</a></li>
+                <li><a href="https://github.com/benhoff">Github</a></li>
+                <li><a href="https://www.youtube.com/channel/UChWbNrHQHvKK6paclLp7WYw">Youtube</a></li>
+        </ul>
+
+</aside>
+
+<!-- Content -->
+<article>
+    <section id="content">
+        <article>
+            <h2 class="post_title post_detail"><a href="https://benhoff.net/flashing-beaglebone-black.html" rel="bookmark"
+                                                  title="Permalink to Flashing Beaglebone Black">Flashing Beaglebone&nbsp;Black</a></h2>
+            <div class="entry-content blog-post">
+                <p>All right, let&#8217;s update a <a class="reference external" href="https://beagleboard.org/black">beaglebone black</a>.</p>
+<p>I need to flash the&nbsp;thing.</p>
+<p>So <a class="reference external" href="https://beagleboard.org/latest-images">downloading</a> the latest image from the repository, I need to unpack the&nbsp;image.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> unxz bone-debian-X.X-iot-armhf-YYYY-MM-DD-4gb.img.xz
+</pre></div>
+<p>Ok, now I&#8217;ve got the uncompressed&nbsp;image.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> lsblk
+</pre></div>
+<p>Shows the <span class="caps">SD</span> card I&#8217;ve just plugged in as&nbsp;/dev/sdc</p>
+<div class="highlight"><pre><span></span><span class="go">sudo mount /dev/sdc /mnt</span>
+</pre></div>
+<p>Then let&#8217;s write our&nbsp;image.</p>
+<div class="highlight"><pre><span></span><span class="go">sudo dd if=bone-debian*.img of=/dev/sdc bs=512 status=progress</span>
+</pre></div>
+<p>Believe me, that little &#8216;status=progress&#8217; bit is a life saver. Otherwise you have no idea how long it&#8217;s going to take. I also don&#8217;t know how to kill dd without pulling out the&nbsp;drive.</p>
+<p>The last two sentences are&nbsp;related.</p>
+<p>I&#8217;m following <a class="reference external" href="http://derekmolloy.ie/write-a-new-image-to-the-beaglebone-black/">this</a> blog post by the way.
+Since you&#8217;re going to be awhile.
+My image size was 4 gigabytes with a transfer speed of ~6&nbsp;megabytes/second.</p>
+<p>And it died. 13 minutes of waiting&#8230; Ok. Let&#8217;s try again. (<a class="reference external" href="http://guichaz.free.fr/iotop/">Iotop</a> will show you if the copy is still&nbsp;working)</p>
+<p>Died again. 3rd times the charm.
+Nope. Ok on to something else. Normally I&#8217;d just go get a new <span class="caps">SD</span> card, but I&#8217;m transferring this through like 3 adapters and it&#8217;s been known to give me issues in the&nbsp;past.</p>
+<p>Stack Exchange to the rescue. According to <a class="reference external" href="https://unix.stackexchange.com/questions/180330/resuming-a-dd-of-an-entire-disk">this post</a> I should just be able to resume where I left off.&nbsp;Neat.</p>
+<p>You&#8217;ll want to seek and skip. The output of should look something like&nbsp;this.</p>
+<div class="highlight"><pre><span></span><span class="go">6963200+0 records in</span>
+<span class="go">6963200+0 records out</span>
+<span class="go">3565158400 bytes (3.6 GB, 3.3 GiB) copied, 732.023 s, 4.9 MB/s</span>
+</pre></div>
+<p>You&#8217;ll want to use the records for the seek and skip variables referenced&nbsp;above.</p>
+<p>However, after some serious heartache, it looks like my dd just didn&#8217;t terminate correctly, and everything was&nbsp;written.</p>
+<p>So now, holding down the boot button, waiting for the buttons to start flashing the heartbeat pattern, and it looks like we&#8217;re in&nbsp;business.</p>
+<div class="highlight"><pre><span></span><span class="gp">$</span> ssh debian@192.168.7.2
+</pre></div>
+<p>The password was in the banner for&nbsp;me.</p>
+<p>Now on to <a class="reference external" href="http://kacangbawang.com/beagleboneblack-revc-debloat-part-1/">demucking</a> the&nbsp;install.</p>
+
+            </div>
+            <div class="post_list">
+                <span>By </span>
+                <a href="https://benhoff.net/author/ben-hoff.html">@Ben Hoff</a>
+                <span> in </span>
+                <span class="post_category"><a href="https://benhoff.net/category/random.html" rel="bookmark"
+                                               title="Permalink to Random">[ Random ]</a></span>
+                <span class="post_date">Mon 12 June 2017</span>
+                <div><span>Tags : </span>
+                </div>
+
+                <div class="entry-social">
+                    <span class="twitter"><a target="_blank" rel="nofollow"
+                                             onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=400,width=700');return false;"
+                                             title="Twitter"
+                                             href="https://twitter.com/share?url=https://benhoff.net/flashing-beaglebone-black.html&text=Flashing Beaglebone Black&via="><img
+                            src="https://benhoff.net/theme/images/icons/twitter-s.png"></a></span>
+
+                    <span class="gplus"><a target="_blank" title="Google +"
+                                           href="https://plus.google.com/share?url=https://benhoff.net/flashing-beaglebone-black.html&hl=fr"
+                                           rel="nofollow"
+                                           onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/google-s.png"></a></span>
+
+                    <span class="facebook"><a target="_blank" title="Facebook" rel="nofollow"
+                                              onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=500,width=700');return false;"
+                                              href="https://www.facebook.com/sharer.php?u=https://benhoff.net/flashing-beaglebone-black.html&t=Flashing Beaglebone Black"><img
+                            src="https://benhoff.net/theme/images/icons/facebook-s.png"></a></span>
+
+                    <a target="_blank" title="Linkedin"
+                       href="https://www.linkedin.com/shareArticle?mini=true&url=https://benhoff.net/flashing-beaglebone-black.html&title=Flashing Beaglebone Black"
+                       rel="nofollow"
+                       onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=450,width=650');return false;"><img
+                            src="https://benhoff.net/theme/images/icons/linkedin-s.png"></a>
+
+                    <span class="mail"><a
+                            href="mailto:?subject=Flashing Beaglebone Black&amp;body=Viens découvrir un article à propos de [Flashing Beaglebone Black] sur le site de Ben Hoff. https://benhoff.net/flashing-beaglebone-black.html"
+                            title="Share by Email" target="_blank"><img
+                            src="https://benhoff.net/theme/images/icons/mail-s.png"></a></span>
+                </div>
+            </div>
+                <div class="comments">
+                    <h2>Comments !</h2>
+		<div id='discourse-comments'></div>
+
+		<script type="text/javascript">
+		  DiscourseEmbed = { discourseUrl: 'https://community.benhoff.net/',
+							 discourseEmbedUrl:'https://benhoff.net/flashing-beaglebone-black.html' };
+
+		  (function() {
+			var d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+			d.src = DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+			(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+		  })();
+		</script>
+
+      <noscript>Please enable JavaScript to view the comments.</noscript>
+                </div>
+        </article>
+    </section>
+</article>
+
+<!-- Footer -->
+
+    <!-- Analytics -->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-100747808-1']);
+        _gaq.push(['_trackPageview']);
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+</body>
+</html>
